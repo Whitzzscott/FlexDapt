@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlexDapt</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-image: url('./IMAGES/background.jpg');
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      animation: fadeIn 1s;
+      font-family: 'Roboto', sans-serif;
+      user-select: none;
+      color: #ffffff;
+      text-align: center;
+      padding: 20px;
+    }
+    #Title {
+      font-size: 7vw;
+      margin-bottom: 6vh;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+    }
+    #app {
+      margin-top: 6vh;
+      width: 100%;
+      max-width: 650px;
+    }
+    #h1 {
+      font-size: 5vw;
+      margin-bottom: 6vh;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+    }
+    button {
+      margin: 12px;
+      padding: 2.5vh 6vw;
+      font-size: 4vw;
+      transition: transform 0.3s, background-color 0.3s;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 220px;
+    }
+    button.highlight {
+      background-color: #007bff;
+    }
+    button:hover {
+      transform: scale(1.1);
+      background-color: #0056b3;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @media (max-width: 600px) {
+      #Title {
+        font-size: 15vw;
+      }
+      #h1 {
+        font-size: 6vw;
+      }
+      button {
+        font-size: 4.5vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1 id="Title">FlexDapt</h1>
+  <div id="app">
+    <h1 id="h1">Are you using a PC or Mobile?</h1>
+    <button id="pc" class="bg-gray-600 text-white font-bold">PC</button>
+    <button id="mobile" class="bg-gray-600 text-white font-bold">Mobile</button>
+  </div>
+  <script>
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    const isPC = !isMobile;
+
+    if (isPC) {
+      document.getElementById('pc').classList.add('highlight');
+    } else if (isMobile) {
+      document.getElementById('mobile').classList.add('highlight');
+    }
+  </script>
+  <script src="main.js"></script>
+</body>
+</html>
