@@ -1,0 +1,7 @@
+name = "flexdapt"
+main = "index.html"
+type = "javascript"
+
+[build]
+command = "npm run build"
+directory = "dist"
