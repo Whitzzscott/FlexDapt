@@ -8,7 +8,7 @@ const { fileURLToPath } = require('url');
 const app = express();
 const PORT = 8080;
 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 app.use(express.json());
 
