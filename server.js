@@ -87,8 +87,7 @@ app.post('/generate', express.json(), (req, res) => {
         return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    fetch('/mainservice', {
-        method: 'POST',
+    fetch('http://localhost:4000/mainservice', { 
         headers: {
             'Content-Type': 'application/json'
         },
@@ -107,6 +106,7 @@ app.post('/generate', express.json(), (req, res) => {
         return res.status(500).json({ error: 'Error processing request', details: error.message });
     });
 });
+
 
 
 
