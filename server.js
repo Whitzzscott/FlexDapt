@@ -80,36 +80,6 @@ app.post('/charactersdata', (req, res) => {
 });
 
 
-app.post('/generate', express.json(), (req, res) => {
-    const { prompt } = req.body;
-
-    if (!prompt) {
-        return res.status(400).json({ error: 'Prompt is required' });
-    }
-
-    fetch('http://localhost:4000/mainservice', { 
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ prompt })
-    })
-    .then(response => {
-        if (!response.ok) {
-            return res.status(response.status).json({ error: 'Error connecting to the main service' });
-        }
-        return response.json();
-    })
-    .then(data => {
-        return res.status(200).json(data);
-    })
-    .catch(error => {
-        return res.status(500).json({ error: 'Error processing request', details: error.message });
-    });
-});
-
-
-
-
 app.get('/charactersdata', (req, res) => {
     try {
         getAllCharacters((characters) => {
@@ -144,7 +114,7 @@ app.post('/generatetext', express.json(), (req, res) => {
 
     const text = message || prompt;
 
-    fetch('/generate', {
+    fetch('https://serger.onrender.com/generate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
