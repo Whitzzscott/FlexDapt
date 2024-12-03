@@ -5,3 +5,6 @@ type = "javascript"
 [build]
 command = "npm run build"
 directory = "dist"
+
+[pages]
+  build_output_dir = "public"
