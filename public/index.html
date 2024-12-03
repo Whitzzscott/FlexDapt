@@ -148,7 +148,16 @@
         </button>
         <button class="btn btn-primary mt-2" onclick="fetchCharacters()">Load Characters</button>
         <script>
-
+            document.addEventListener('DOMContentLoaded', fetchCharacters);
+            function fetchCharacters() {
+                fetch('/characters')
+                    .then(response => response.text())
+                    .then(data => {
+                        const charactersContainer = document.getElementById('characters');
+                        charactersContainer.innerHTML = data;
+                    })
+                    .catch(error => console.error('Error loading characters:', error));
+            }
         </script>
         <ul class="dropdown-menu" aria-labelledby="tagsDropdown" style="background-color: black;">
             <li><a class="dropdown-item" style="color: white;" href="#" onclick="filterCharacters('Female')">Female</a></li>
