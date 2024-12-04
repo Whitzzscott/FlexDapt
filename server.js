@@ -1,183 +1,112 @@
 const express = require('express');
+const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
-const sqlite3 = require('sqlite3');
 const path = require('path');
 const axios = require('axios');
+const fs = require('fs');
 const dotenv = require('dotenv');
 const { fileURLToPath } = require('url');
 const app = express();
 const PORT = 8080;
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:8080'
+}));
 app.use(express.json());
 
-const DB_FILE = path.join(__dirname, 'data', 'characters.db');
+require('dotenv').config();
 
+const SUPABASE_URL = 'https://dojdyydsanxoblgjmzmq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvamR5eWRzYW54b2JsZ2ptem1xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMzMDUxNTQsImV4cCI6MjA0ODg4MTE1NH0.mONIXEuP2lF7Hu9J34D9f4yQWuFuPTC5tE-rpbAJTxg';
 
-const createTable = () => {
-    const db = new sqlite3.Database(DB_FILE);
-    db.serialize(() => {
-        db.run(`
-            CREATE TABLE IF NOT EXISTS characters (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                photo TEXT NOT NULL,
-                description TEXT NOT NULL,
-                modelInstructions TEXT NOT NULL,
-                firstMessage TEXT NOT NULL,
-                system TEXT NOT NULL,
-                tag TEXT NOT NULL
-            )
-        `);
-    });
-    db.close();
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const insertCharacter = async (characterData) => {
+    const { data, error } = await supabase
+        .from('characters')
+        .insert([{
+            name: characterData.name,
+            photo: characterData.photo,
+            description: characterData.description,
+            modelInstructions: characterData.modelInstructions || null,
+            firstMessage: characterData.firstMessage || null,
+            system: characterData.system,
+            tag: characterData.tag,
+            persona: characterData.persona
+        }])
+        .select();
+
+    if (error) {
+        throw new Error("Error saving character data: " + error.message);
+    }
+
+    if (!data || data.length === 0) {
+        throw new Error("No data returned after insert");
+    }
+
+    return data[0];
 };
 
-const insertCharacter = (characterData) => {
-    const db = new sqlite3.Database(DB_FILE);
-    db.run(`
-        INSERT INTO characters (name, photo, description, modelInstructions, firstMessage, system, tag)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    `, [characterData.name, characterData.photo, characterData.description, characterData.modelInstructions, characterData.firstMessage, characterData.system, characterData.tag]);
-    db.close();
+const getAllCharacters = async () => {
+    const { data, error } = await supabase
+        .from('characters')
+        .select('*');
+
+    if (error) {
+        throw new Error("Error fetching characters: " + error.message);
+    }
+
+    if (!data) {
+        return [];
+    }
+
+    return data;
 };
 
-const getAllCharacters = (callback) => {
-    const db = new sqlite3.Database(DB_FILE);
-    db.all('SELECT * FROM characters', [], (err, rows) => {
-        if (err) {
-            return callback([]);
-        }
-        callback(rows.map(row => ({
-            id: row.id,
-            name: row.name,
-            photo: row.photo,
-            description: row.description,
-            modelInstructions: row.modelInstructions,
-            firstMessage: row.firstMessage,
-            system: row.system,
-            tag: row.tag
-        })));
-    });
-    db.close();
-};
-
-app.post('/charactersdata', (req, res) => {
+app.post('/charactersdata', async (req, res) => {
     const payload = req.body;
-    const requiredFields = ['name', 'photo', 'description', 'modelInstructions', 'firstMessage', 'system', 'tag'];
+    const requiredFields = ['name', 'photo', 'description', 'modelInstructions', 'firstMessage', 'system', 'tag', 'persona'];
 
     if (!requiredFields.every(field => payload.hasOwnProperty(field))) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
     try {
-        insertCharacter(payload);
-        return res.status(201).json({ message: 'Character added successfully!' });
+        const insertedCharacter = await insertCharacter(payload);
+        return res.status(201).json({ message: 'Character added successfully!', character: insertedCharacter });
     } catch (e) {
-        return res.status(400).json({ error: 'Error parsing request', details: e.message });
+        return res.status(500).json({ error: e.message });
     }
 });
 
-
-app.get('/charactersdata', (req, res) => {
+app.get('/characterdata/id', async (req, res) => {
+    const characterId = req.query.id;
     try {
-        getAllCharacters((characters) => {
-            if (!characters || characters.length === 0) {
-                return res.status(404).json({ error: 'No characters found' });
-            }
+        const { data, error } = await supabase
+            .from('characters')
+            .select('*')
+            .eq('id', characterId)
+            .single();
 
-            const characterList = characters.map(row => ({
-                id: row.id,
-                name: row.name,
-                photo: row.photo,
-                description: row.description,
-                modelInstructions: row.modelInstructions,
-                firstMessage: row.firstMessage,
-                system: row.system,
-                tag: row.tag
-            }));
-
-            return res.status(200).json(characterList);
-        });
-    } catch (e) {
-        return res.status(500).json({ error: 'Error fetching character data', details: e.message });
-    }
-});
-
-app.post('/generatetext', express.json(), (req, res) => {
-    const { message, prompt } = req.body;
-
-    if (!message && !prompt) {
-        return res.status(400).json({ error: 'Message or prompt is required' });
-    }
-
-    const text = message || prompt;
-
-    fetch('https://serger.onrender.com/generate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ prompt: text })
-    })
-    .then(response => {
-        if (!response.ok) {
-            return res.status(response.status).json({ error: 'Error connecting to the generate service', details: 'Failed to parse URL from /generate' });
+        if (error) {
+            throw error;
         }
-        return response.json();
-    })
-    .then(data => {
+
+        if (!data) {
+            return res.status(404).json({ error: 'Character not found' });
+        }
+
         res.status(200).json(data);
-    })
-    .catch(error => {
-        res.status(500).json({ error: 'Error connecting to the generate service', details: error.message });
-    });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
-app.route('/persona')
-    .get(async (req, res) => {
-        const fs = require('fs');
-        const path = require('path');
-        const personaPath = path.join(__dirname, 'public', 'JSONS', 'persona.json');
-
-        fs.readFile(personaPath, 'utf8', (error, data) => {
-            if (error) {
-                return res.status(500).json({ error: 'Error reading persona data' });
-            }
-            res.json(JSON.parse(data));
-        });
-    })
-    .post(express.json(), async (req, res) => {
-        const fs = require('fs');
-        const path = require('path');
-        const personaPath = path.join(__dirname, 'public', 'JSONS', 'persona.json');
-
-        if (!req.body || typeof req.body !== 'object') {
-            return res.status(400).json({ error: 'Request body must be a non-empty object' });
-        }
-
-        const { Name, Description, Photo } = req.body;
-
-        if (typeof Name !== 'string' || typeof Description !== 'string' || typeof Photo !== 'string' || !Name || !Description || !Photo) {
-            return res.status(400).json({ error: 'Name, Description, and Photo must be non-empty strings' });
-        }
-
-        const personaData = { Name, Description, Photo };
-
-        fs.writeFile(personaPath, JSON.stringify(personaData, null, 2), (error) => {
-            if (error) {
-                return res.status(500).json({ error: 'Error saving persona data' });
-            }
-            res.status(200).json({ message: 'Persona data overridden successfully' });
-        });
-    });
-
-app.post('/create', express.json(), async (req, res) => {
+app.post('/create', async (req, res) => {
     try {
-        const { name, photo, description, modelInstructions, system, tag, firstMessage } = req.body;
+        const { name, photo, description, modelInstructions, system, tag, firstMessage, persona } = req.body;
 
-        if (!name || !description || !modelInstructions || !system || !tag || !firstMessage) {
+        if (!name || !description || !modelInstructions || !system || !tag || !firstMessage || !persona) {
             return res.status(400).json({
                 error: 'All fields are required'
             });
@@ -188,31 +117,19 @@ app.post('/create', express.json(), async (req, res) => {
             photo: photo || '',
             description,
             modelInstructions,
-            firstMessage,
             system,
-            tag
+            tag,
+            persona,
+            firstMessage: firstMessage
         };
 
-        const response = await fetch('/charactersdata', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(characterData)
-        });
+        const insertedCharacter = await insertCharacter(characterData);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
         res.status(200).json({
             message: 'Data saved successfully',
-            data: data
+            data: insertedCharacter
         });
     } catch (error) {
-        console.error('Error saving data:', error);
         res.status(500).json({
             error: 'Error saving character data',
             details: error.message
@@ -220,22 +137,15 @@ app.post('/create', express.json(), async (req, res) => {
     }
 });
 
+
 app.get('/characters', async (req, res) => {
     try {
-        const response = await fetch(`${req.protocol}://${req.get('host')}/charactersdata`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            return res.status(502).json({ "error": "Error fetching character data", "details": "HTTP error! status: 502" });
+        const characters = await getAllCharacters();
+        if (!characters || characters.length === 0) {
+            return res.status(404).json({ error: 'No characters found' });
         }
 
-        const data = await response.json();
-
-        const validData = data.filter(character => {
+        const validData = characters.filter(character => {
             return character
                 && typeof character.id === 'number'
                 && typeof character.name === 'string'
@@ -244,6 +154,7 @@ app.get('/characters', async (req, res) => {
                 && typeof character.modelInstructions === 'string'
                 && typeof character.system === 'string'
                 && typeof character.tag === 'string'
+                && typeof character.persona === 'string'
                 && (typeof character.firstMessage === 'string' || character.firstMessage === undefined);
         });
 
@@ -266,7 +177,8 @@ app.get('/characters', async (req, res) => {
         <div class="card-text">
             <p class="mb-2" style="font-family: sans-serif; font-weight: 400; color: white;"> <strong>Description:</strong> ${character.description.length > 300 ? character.description.substring(0, 300) + '...' : character.description}</p>
             <p class="mb-2" style="font-family: sans-serif; font-weight: 400; color: white;"><strong>Tag:</strong> <span class="badge bg-secondary" style="word-break: break-all; background-color: #6c757d;">${character.tag}</span></p>
-            <a href="chatting.html" id="chat-button-${character.id}" class="btn btn-primary chat-btn" style="margin-top: 10px;" data-id="${character.id}" data-name="${character.name}" data-description="${character.description}" data-model-instructions="${character.modelInstructions}" data-system="${character.system}" data-first-message="${character.firstMessage}">Chat</a>
+            <p class="mb-2" style="font-family: sans-serif; font-weight: 400; color: white;"><strong>Persona:</strong> ${character.persona}</p>
+            <a href="chatting.html" id="chat-button-${character.id}" class="btn btn-primary chat-btn" style="margin-top: 10px;" data-id="${character.id}" data-name="${character.name}" data-description="${character.description}" data-model-instructions="${character.modelInstructions}" data-system="${character.system}" data-first-message="${character.firstMessage}" data-persona="${character.persona}">Chat</a>
         </div>
     </div>
 </div>
@@ -304,22 +216,15 @@ app.get('/characters', async (req, res) => {
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 </style>
-
 `;
         });
 
         const htmlWrapper = `
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; justify-items: center; max-width: 1200px; margin: 0 auto; padding: 20px;">
-        ${characterCards.sort((a,b) => a.id - b.id).map(card => `<div style="margin: 10px; width: 100%;">
-            <a href="javascript:void(0);" id="chat-button-${card.id}" class="chat-button">${card}</a>
-        </div>`).join('\n        ')}
-    </div>
-    <script>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; justify-items: center; max-width: 1200px; margin: 0 auto; padding: 20px;">
         ${characterCards.sort((a,b) => a.id - b.id).map(card => `<div style="margin: 10px; width: 100%;">${card}</div>`).join('\n        ')}
     </div>
     <script>
-        async function sendCharacterData(characterId, characterName, description, modelInstructions, system, firstMessage) {
+        async function sendCharacterData(characterId, characterName, description, modelInstructions, system, firstMessage, persona) {
             if (!firstMessage) {
                 console.error('Error: firstMessage is required but not provided');
                 return;
@@ -330,7 +235,8 @@ app.get('/characters', async (req, res) => {
                 Description: description,
                 ModelInstructions: modelInstructions,
                 System: system,
-                FirstMessage: firstMessage
+                FirstMessage: firstMessage,
+                Persona: persona
             };
 
             try {
@@ -369,26 +275,17 @@ app.get('/characters', async (req, res) => {
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const chatButtons = document.querySelectorAll('.chat-button');
+            const chatButtons = document.querySelectorAll('.chat-btn');
             chatButtons.forEach(button => {
-                const characterId = button.id.split('-')[2];
-                const characterData = {
-                    id: characterId,
-                    name: button.getAttribute('data-name'),
-                    description: button.getAttribute('data-description'),
-                    modelInstructions: button.getAttribute('data-model-instructions'),
-                    system: button.getAttribute('data-system'),
-                    firstMessage: button.getAttribute('data-first-message')
-                };
-
                 button.addEventListener('click', () => {
                     sendCharacterData(
-                        characterData.id,
-                        characterData.name,
-                        characterData.description,
-                        characterData.modelInstructions,
-                        characterData.system,
-                        characterData.firstMessage
+                        button.getAttribute('data-id'),
+                        button.getAttribute('data-name'),
+                        button.getAttribute('data-description'),
+                        button.getAttribute('data-model-instructions'),
+                        button.getAttribute('data-system'),
+                        button.getAttribute('data-first-message'),
+                        button.getAttribute('data-persona')
                     );
                 });
             });
@@ -407,70 +304,109 @@ app.get('/characters', async (req, res) => {
     }
 });
 
-app.route('/firstMessageAccepter')
-    .post(express.json(), async (req, res) => {
-        try {
-            const firstMessage = req.body.firstMessage;
+app.post('/generatetext', express.json(), async (req, res) => {
+    const { message, prompt } = req.body;
 
-            if (!firstMessage) {
-                return res.status(400).json({ error: 'firstMessage must be provided' });
-            }
+    if (!message && !prompt) {
+        return res.status(400).json({ error: 'Message or prompt is required' });
+    }
 
-            const fs = require('fs').promises;
-            const path = require('path');
-            const firstMessagePath = path.join(__dirname, 'public', 'JSONS', 'firstMessage.json');
+    const text = message || prompt;
 
-            const data = {
-                firstMessage: firstMessage
-            };
-
-            await fs.mkdir(path.join(__dirname, 'public', 'JSONS'), { recursive: true });
-            await fs.writeFile(firstMessagePath, JSON.stringify(data), { encoding: 'utf8' });
-            res.status(200).json({ message: 'First message overridden successfully' });
-
-        } catch (error) {
-            res.status(500).json({ error: 'Error processing first message', details: error.message });
-        }
-    })
-    .get(async (req, res) => {
-        try {
-            const fs = require('fs').promises;
-            const path = require('path');
-            const firstMessagePath = path.join(__dirname, 'public', 'JSONS', 'firstMessage.json');
-
-            const data = await fs.readFile(firstMessagePath, 'utf8');
-            if (!data) {
-                return res.status(500).json({ error: 'No data found in first message file' });
-            }
-            const messageData = JSON.parse(data);
-            res.json({ message: messageData.firstMessage });
-        } catch (error) {
-            res.status(500).json({ error: 'Error getting first message', details: error.message });
-        }
-    });
-
-app.get('/first-message', async (req, res) => {
     try {
-        const fs = require('fs');
-        const path = require('path');
-        const firstMessagePath = path.join(__dirname, 'public', 'JSONS', 'firstMessage.json');
-
-        fs.readFile(firstMessagePath, 'utf8', (error, data) => {
-            if (error) {
-                return res.status(500).json({ error: 'Error reading first message data' });
-            }
-            if (!data) {
-                return res.status(500).json({ error: 'No data found in first message file' });
-            }
-            const messageData = JSON.parse(data);
-            if (messageData.firstMessage) {
-                res.json({ message: messageData.firstMessage });
-            } else {
-                res.status(400).json({ error: 'Invalid data format: firstMessage not found' });
+        const response = await axios.post('https://serger.onrender.com/generate', {
+            prompt: text
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
             }
         });
+
+        res.status(200).json(response.data);
     } catch (error) {
-        res.status(500).json({ error: 'Error getting first message', details: error.message });
+        if (!res.headersSent) {
+            res.status(500).json({ 
+                error: 'Error connecting to the generate service', 
+                details: error.response?.data?.error || error.message 
+            });
+        }
+    }
+});
+
+app.route('/persona')
+    .get((req, res) => {
+        const jsonFilePath = path.join(__dirname, 'JSONS', 'personaData.json');
+        fs.readFile(jsonFilePath, 'utf8', (error, data) => {
+            if (error) {
+                if (error.code === 'ENOENT') {
+                    return res.json({}); 
+                }
+                return res.status(500).json({ error: 'Error reading persona data' });
+            }
+            const personaData = JSON.parse(data);
+            if (!personaData) {
+                return res.status(404).json({ error: 'No persona data found' });
+            }
+            res.json(personaData);
+        });
+    })
+    .post(express.json(), (req, res) => {
+        if (!req.body || typeof req.body !== 'object') {
+            return res.status(400).json({ error: 'Request body must be a non-empty object' });
+        }
+
+        const { Name, Description, Photo } = req.body;
+
+        if (typeof Name !== 'string' || typeof Description !== 'string' || typeof Photo !== 'string' || !Name || !Description || !Photo) {
+            return res.status(400).json({ error: 'Name, Description, and Photo must be non-empty strings' });
+        }
+
+        const personaData = { Name, Description, Photo };
+        const jsonFilePath = path.join(__dirname, 'JSONS', 'personaData.json');
+
+        fs.mkdir(path.dirname(jsonFilePath), { recursive: true }, (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error creating directory', details: err.message });
+            }
+
+            fs.writeFile(jsonFilePath, JSON.stringify(personaData, null, 2), (err) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Error saving persona data to file', details: err.message });
+                }
+                res.status(200).json({ message: 'Persona data saved successfully' });
+            });
+        });
+    });
+
+app.route('/firstMessageAccepter')
+    .post(express.json(), (req, res) => {
+        const firstMessage = req.body.firstMessage;
+
+        if (!firstMessage) {
+            return res.status(400).json({ error: 'firstMessage must be provided' });
+        }
+
+        const personaData = { firstMessage: firstMessage };
+        req.app.locals.firstMessageData = personaData;
+        res.status(200).json({ message: 'First message overridden successfully' });
+    })
+    .get((req, res) => {
+        const personaData = req.app.locals.firstMessageData;
+        if (!personaData) {
+            return res.status(404).json({ error: 'No first message data found' });
+        }
+        res.json(personaData);
+    });
+
+app.get('/first-message', (req, res) => {
+    const personaData = req.app.locals.firstMessageData;
+    if (!personaData) {
+        return res.status(404).json({ error: 'No first message data found' });
+    }
+    if (personaData.firstMessage) {
+        res.json({ message: personaData.firstMessage });
+    } else {
+        res.status(400).json({ error: 'Invalid data format: firstMessage not found' });
     }
 });
 
@@ -492,7 +428,6 @@ app.get('/tags', async (req, res) => {
     }
 });
 
-createTable();
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
