@@ -11,7 +11,7 @@ const PORT = 8080;
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors({
-    origin: 'http://localhost:8080'
+    origin: 'https://flexdapt.vercel.app'
 }));
 app.use(express.json());
 
