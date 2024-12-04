@@ -381,7 +381,7 @@ fetch('/first-message')
             mainChatBox.appendChild(typingIndicator);
             mainChatBox.scrollTop = mainChatBox.scrollHeight;
             try {
-                const response = await fetch('/generatetext', {
+                const response = await fetch('https://server-hhcx.onrender.com/generatetext', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -449,7 +449,7 @@ const sendMessage = function() {
 
 
         const messagename = document.createElement('div');
-        fetch('/persona')
+        fetch('https://server-hhcx.onrender.com/persona')
             .then(response => response.json())
             .then(data => {
                 messagename.textContent = data.Name;
