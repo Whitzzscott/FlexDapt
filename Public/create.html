@@ -158,7 +158,7 @@
             localStorage.setItem('characterData', JSON.stringify(characterData));
 
             try {
-                const response = await fetch('/create', {
+                const response = await fetch('https://server-hhcx.onrender.com/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(characterData)
