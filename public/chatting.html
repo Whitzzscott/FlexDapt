@@ -152,8 +152,99 @@ fetch('/first-message')
 
 
         <div class="input-container">
+            <button id="menu-button" class="menu-button"><i class="fas fa-bars"></i></button>
             <input type="text" id="user-message" placeholder="Enter your message here...">
             <button id="send-button"><i class="fas fa-paper-plane"></i> Send</button>
+            s<div id="menu-overlay" class="menu-overlay">
+                <div id="menu-content" class="menu-content">
+                    <div class="menu-items">
+                    <select id="service-dropdown" class="menu-item" style="padding: 10px; background: #4A4A4A; border: none; border-radius: 5px; color: #FFFFFF;">
+                        <option value="" disabled selected>Select a service</option>
+                        <option value="flexdapt">Flexdapt</option>
+                        <option value="openrouter">Openrouter</option>
+                    </select>
+                    <div class="input-group">
+                        <label for="temperature" class="form-label">Temperature (0-1):</label>
+                        <input type="number" id="temperature" class="form-control" min="0" max="1" step="0.1" placeholder="Enter temperature" />
+                    </div>
+                    <div class="input-group">
+                        <label for="top_k" class="form-label">Top K (1-100):</label>
+                        <input type="number" id="top_k" class="form-control" min="1" max="100" placeholder="Enter top_k" />
+                    </div>
+                    <div class="input-group">
+                        <label for="max_tokens" class="form-label">Max Tokens (1-100):</label>
+                        <input type="number" id="max_tokens" class="form-control" min="1" max="100" placeholder="Enter max tokens" />
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <style>
+                .menu-button {
+                    padding: 10px;
+                    background: #555;
+                    border: none;
+                    border-radius: 6px;
+                    color: #FFFFFF;
+                    cursor: pointer;
+                    margin-right: 10px;
+                    transition: background 0.3s;
+                }
+                .menu-overlay {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.7);
+                    z-index: 1000;
+                }
+                .menu-content {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #1E1E1E;
+                    padding: 25px;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+                }
+                .menu-overlay.active {
+                    display: block;
+                }
+                .menu-items {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+                .menu-item {
+                    padding: 12px;
+                    background: #4A4A4A;
+                    border: none;
+                    border-radius: 5px;
+                    color: #FFFFFF;
+                    cursor: pointer;
+                    transition: background 0.3s;
+                }
+                .menu-item:hover {
+                    background: #5A5A5A;
+                }
+            </style>
+            <script>
+                const menuButton = document.getElementById('menu-button');
+                const menuOverlay = document.getElementById('menu-overlay');
+                const menuContent = document.getElementById('menu-content');
+
+                menuButton.addEventListener('click', () => {
+                    menuOverlay.classList.add('active');
+                });
+
+                menuOverlay.addEventListener('click', (e) => {
+                    if (e.target === menuOverlay) {
+                        menuOverlay.classList.remove('active');
+                    }
+                });
+            </script>
         </div>
     </div>
     <script>
@@ -289,15 +380,23 @@ fetch('/first-message')
 
             mainChatBox.appendChild(typingIndicator);
             mainChatBox.scrollTop = mainChatBox.scrollHeight;
-
             try {
                 const response = await fetch('/generatetext', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ prompt: text })
+                    body: JSON.stringify({ 
+                        prompt: text,
+                    })
                 });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    sendBotMessage(data.result.response);
+                } else {
+                    throw new Error('Error generating text');
+                }
 
                 if (!response.ok) {
                     dots.forEach(dot => dot.style.background = '#ff4444');
