@@ -8,32 +8,69 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
         body {
-            background-color: #000;
+            background-color: #121212;
             color: #fff;
             min-height: 100vh;
             padding: 20px;
+            font-family: 'Arial', sans-serif;
         }
         .creation-form {
             max-width: 800px;
             margin: 0 auto;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0, 0, 0, 0.8);
             padding: 30px;
             border-radius: 15px;
             border: 1px solid #444;
+            transition: all 0.3s ease;
+        }
+        .creation-form:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         .form-control {
             background-color: #333;
             border: 1px solid #555;
             color: #fff;
             margin-bottom: 20px;
+            transition: all 0.3s ease;
         }
         .form-control:focus {
             background-color: #444;
-            color: #fff;
             border-color: #007bff;
+            color: #fff;
         }
-        textarea {
-            min-height: 150px;
+        .form-label {
+            font-weight: bold;
+        }
+        .btn {
+            background-color: #007bff;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .select2-container {
+            width: 100%;
+        }
+        .custom-tag-field {
+            margin-top: 20px;
+        }
+        .custom-tag-field input {
+            width: calc(100% - 60px);
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .custom-tag-field button {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            cursor: pointer;
+        }
+        .custom-tag-field button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
@@ -56,21 +93,27 @@
                     <label for="description" class="form-label">Character Description</label>
                     <textarea class="form-control" id="description" required></textarea>
                 </div>
-                
+
+                <div class="mb-3">
+                    <label for="persona" class="form-label">Persona</label>
+                    <textarea class="form-control" id="persona" required></textarea>
+                </div>
+
                 <div class="mb-3">
                     <label for="modelInstructions" class="form-label">Character Model Instructions</label>
                     <textarea class="form-control" id="modelInstructions" required></textarea>
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="firstMessage" class="form-label">First Message</label>
                     <textarea class="form-control" id="firstMessage" required></textarea>
                 </div>
+
                 <div class="mb-3">
                     <label for="system" class="form-label">Character System</label>
                     <textarea class="form-control" id="system" required></textarea>
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="tag" class="form-label">Character Tag</label>
                     <select class="form-control" id="tag" required>
@@ -83,8 +126,14 @@
                         <option value="Villain">Villain</option>
                     </select>
                 </div>
-                
-                <button type="submit" class="btn btn-primary w-100">Save Character</button>
+
+                <div class="custom-tag-field">
+                    <label for="customTag" class="form-label">Add Custom Tag</label>
+                    <input type="text" id="customTag" class="form-control" placeholder="Enter a custom tag" />
+                    <button type="button" id="addTag">Add Tag</button>
+                </div>
+
+                <button type="submit" class="btn w-100">Save Character</button>
             </form>
         </div>
     </div>
@@ -92,26 +141,29 @@
     <script>
         document.getElementById('characterForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+
             const characterData = {
-                "name": document.getElementById('name').value,
-                "photo": document.getElementById('photo').value,
-                "description": document.getElementById('description').value,
-                "modelInstructions": document.getElementById('modelInstructions').value,
-                "firstMessage": document.getElementById('firstMessage').value,
-                "system": document.getElementById('system').value,
-                "tag": document.getElementById('tag').value
+                name: document.getElementById('name').value,
+                photo: document.getElementById('photo').value,
+                description: document.getElementById('description').value,
+                modelInstructions: document.getElementById('modelInstructions').value,
+                firstMessage: document.getElementById('firstMessage').value,
+                system: document.getElementById('system').value,
+                tag: document.getElementById('tag').value,
+                persona: document.getElementById('persona').value
             };
-            
+
+            localStorage.setItem('characterData', JSON.stringify(characterData));
+
             try {
                 const response = await fetch('/create', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(characterData)
                 });
-                
+
                 if (response.ok) {
                     window.location.href = 'index.html';
                 } else {
@@ -119,7 +171,34 @@
                 }
             } catch (error) {
                 alert('Error saving character');
-                console.error('Error:', error);
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        window.addEventListener('load', function() {
+            const savedData = JSON.parse(localStorage.getItem('characterData'));
+            if (savedData) {
+                Object.keys(savedData).forEach(function(key) {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        element.value = savedData[key];
+                    }
+                });
+            }
+        });
+
+        document.getElementById('addTag').addEventListener('click', () => {
+            const customTag = document.getElementById('customTag').value.trim();
+            if (customTag) {
+                const tagSelect = document.getElementById('tag');
+                const newOption = document.createElement('option');
+                newOption.value = customTag;
+                newOption.textContent = customTag;
+                tagSelect.appendChild(newOption);
+                document.getElementById('customTag').value = '';
+            } else {
+                alert("Please enter a custom tag");
             }
         });
     </script>
