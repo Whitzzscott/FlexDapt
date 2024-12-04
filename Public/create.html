@@ -80,6 +80,10 @@
         <div class="creation-form">
             <form id="characterForm">
                 <div class="mb-3">
+                    <label for="importButton" class="form-label">Import Character</label>
+                    <button type="button" class="btn" id="importButton">Import</button>
+                </div>
+                <div class="mb-3">
                     <label for="name" class="form-label">Character Name</label>
                     <input type="text" class="form-control" id="name" required>
                 </div>
@@ -113,6 +117,30 @@
                     <label for="system" class="form-label">Character System</label>
                     <textarea class="form-control" id="system" required></textarea>
                 </div>
+                <script>
+                    document.getElementById('importButton').addEventListener('click', () => {
+                        const characterData = {
+                            char_name: "",
+                            char_persona: "",
+                            char_greeting: "",
+                            world_scenario: "",
+                            example_dialogue: "",
+                            name: "",
+                            description: "",
+                            first_mes: "",
+                            scenario: "",
+                            mes_example: "",
+                            personality: ""
+                        };
+
+                        document.getElementById('name').value = characterData.char_name;
+                        document.getElementById('description').value = characterData.description;
+                        document.getElementById('persona').value = characterData.char_persona + ' ' + characterData.personality;
+                        document.getElementById('firstMessage').value = characterData.char_greeting;
+                        document.getElementById('modelInstructions').value = characterData.mes_example;
+                        document.getElementById('system').value = characterData.scenario;
+                    });
+                </script>
 
                 <div class="mb-3">
                     <label for="tag" class="form-label">Character Tag</label>
@@ -127,10 +155,12 @@
                     </select>
                 </div>
 
-                <div class="custom-tag-field">
-                    <label for="customTag" class="form-label">Add Custom Tag</label>
-                    <input type="text" id="customTag" class="form-control" placeholder="Enter a custom tag" />
-                    <button type="button" id="addTag">Add Tag</button>
+                <div class="custom-tag-field mb-3">
+                    <label for="customTag" class="form-label">Custom Tag</label>
+                    <div class="input-group">
+                        <input type="text" id="customTag" class="form-control" placeholder="Custom tag" />
+                        <button type="button" id="addTag" class="btn btn-outline-primary">Add Tag</button>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn w-100">Save Character</button>
