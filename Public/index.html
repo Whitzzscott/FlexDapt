@@ -151,7 +151,7 @@
             document.addEventListener('DOMContentLoaded', fetchCharacters);
             function fetchCharacters() {
                 const startTime = performance.now();
-                fetch('/characters')
+                fetch('https://server-hhcx.onrender.com/characters')
                     .then(response => response.text())
                     .then(data => {
                         const charactersContainer = document.getElementById('characters');
@@ -173,7 +173,7 @@
         </ul>
         <script>
             function filterCharacters(tag) {
-                fetch('/characterdata')
+                fetch('https://server-hhcx.onrender.com/characterdata')
                     .then(response => response.text())
                     .then(data => {
                         const parser = new DOMParser();
@@ -241,7 +241,7 @@
         });
 
         document.getElementById('userPersonaBtnFooter').addEventListener('click', function() {
-            fetch('/persona')
+            fetch('https://server-hhcx.onrender.com/persona')
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('personaName').value = data.Name || '';
@@ -258,7 +258,7 @@
                 const description = document.getElementById('personaDescription').value.trim();
                 const photo = document.getElementById('personaPhoto').value.trim();
                 if (name && description && photo) {
-                    fetch('/persona', {
+                    fetch('https://server-hhcx.onrender.com/persona', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
