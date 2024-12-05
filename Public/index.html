@@ -151,7 +151,21 @@
                         const charactersContainer = document.getElementById('characters');
                         charactersContainer.innerHTML = data;
                         const endTime = performance.now();
-                        document.getElementById('time').textContent = `Characters loaded in ${(endTime - startTime).toFixed(2)} ms`;
+                        const timeElement = document.getElementById('time');
+                        timeElement.style.fontFamily = "'Press Start 2P', cursive";
+                        timeElement.style.color = '#00ff00';
+                        timeElement.style.textShadow = '0 0 10px rgba(0,255,0,0.5)';
+                        timeElement.style.fontSize = '1.2em';
+                        timeElement.style.letterSpacing = '2px';
+                        timeElement.textContent = `Characters loaded in ${(endTime - startTime).toFixed(2)} ms`;
+                        timeElement.classList.add('animate__animated', 'animate__bounceIn', 'animate__delay-1s');
+                        timeElement.addEventListener('mouseover', () => {
+                            timeElement.classList.remove('animate__bounceIn');
+                            timeElement.classList.add('animate__pulse');
+                        });
+                        timeElement.addEventListener('mouseout', () => {
+                            timeElement.classList.remove('animate__pulse');
+                        });
                         hideLoadingPopup();
                     })
                     .catch(error => {
@@ -162,8 +176,8 @@
         });
     </script>
     <div class="text-center mt-3">
-        <a href="http://agaga.com" class="d-inline-block rounded overflow-hidden shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-105" style="font-weight: bold;">
-            <img src="./IMAGES/footer.png" alt="Footer Image" class="rounded" style="max-width: 40%; height: auto; border-radius: 20px; filter: brightness(1.1); padding: 8px;">
+        <a href="http://agaga.com" class="d-inline-block rounded overflow-hidden shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-105" style="font-weight: bold; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
+            <img src="./IMAGES/footer.png" alt="Footer Image" class="rounded" style="max-width: 40%; height: auto; border-radius: 20px; filter: brightness(1.1); padding: 8px; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
         </a>
     </div>
     <style>
@@ -186,18 +200,39 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
         }
     </style>
-    <h1 style="position: absolute; top: 10px; left: 10px; font-size: 1.5rem; color: #ffffff;">FlexDapt</h1>
+    <h1 style="position: absolute; top: 10px; left: 10px; font-size: 1.5rem; color: #ffffff; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">FlexDapt</h1>
     <div class="search-section d-flex justify-content-center align-items-center mb-4" style="font-size: 1.2rem;">
         <input type="text" class="search-input form-control me-2" placeholder="Search characters..." aria-label="Search characters" style="padding: 8px; width: 80%;">
         <button class="search-button btn btn-primary" style="padding: 8px 16px; font-size: 1rem;">Search</button>
     </div>
     <div class="dropdown mb-3" id="tagsDropdownContainer">
-        <button class="btn btn-dark dropdown-toggle" type="button" id="tagsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            Tags
-        </button>
+        <div class="d-flex align-items-center">
+            <button class="btn btn-dark dropdown-toggle" type="button" id="tagsDropdown" aria-expanded="false">
+                Tags
+            </button>
+            <div id="selectedTags" class="d-flex flex-wrap ms-2"></div>
+        </div>
         <p id="time"></p>
         <script>
-            document.addEventListener('DOMContentLoaded', fetchCharacters);
+            document.addEventListener('DOMContentLoaded', () => {
+                fetchCharacters();
+                initializeDropdown();
+            });
+
+            function initializeDropdown() {
+                const dropdownButton = document.getElementById('tagsDropdown');
+                const dropdownMenu = document.querySelector('.dropdown-menu');
+                
+                if (dropdownButton) {
+                    dropdownButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (dropdownMenu) {
+                            dropdownMenu.classList.toggle('show');
+                        }
+                    });
+                }
+            }
+
             function fetchCharacters() {
                 const startTime = performance.now();
                 fetch('https://server-hhcx.onrender.com/characters')
@@ -211,30 +246,82 @@
                     .catch(error => console.error('Error loading characters:', error));
             }
         </script>
-        <ul class="dropdown-menu" aria-labelledby="tagsDropdown" style="background-color: black;">
-            <li><a class="dropdown-item" style="color: white;" href="#" onclick="filterCharacters('None')">None</a></li>
-            <li><a class="dropdown-item" style="color: white;" href="#" onclick="filterCharacters('Female')">Female</a></li>
-            <li><a class="dropdown-item" style="color: white;" href="#" onclick="filterCharacters('Male')">Male</a></li>
-            <li><a class="dropdown-item" style="color: white;" href="#" onclick="filterCharacters('Fantasy')">Fantasy</a></li>
-            <li><a class="dropdown-item" style="color: white;" href="#" onclick="filterCharacters('Sci-Fi')">Sci-Fi</a></li>
-            <li><a class="dropdown-item" style="color: white;" href="#" onclick="filterCharacters('Hero')">Hero</a></li>
-            <li><a class="dropdown-item" style="color: white;" href="#" onclick="filterCharacters('Villain')">Villain</a></li>
+        <ul class="dropdown-menu animate__animated animate__fadeIn" aria-labelledby="tagsDropdown" style="background-color: black; z-index: 999; pointer-events: auto;" id="tagsList">
+            <li><a class="dropdown-item" style="color: white;" href="#" onclick="handleTagClick('Villain')">Villain</a></li>
+            <li><a class="dropdown-item" style="color: white;" href="#" onclick="handleTagClick('Hero')">Hero</a></li>
+            <li><a class="dropdown-item" style="color: white;" href="#" onclick="handleTagClick('Sci-Fi')">Sci-Fi</a></li>
+            <li><a class="dropdown-item" style="color: white;" href="#" onclick="handleTagClick('Fantasy')">Fantasy</a></li>
+            <li><a class="dropdown-item" style="color: white;" href="#" onclick="handleTagClick('Male')">Male</a></li>
+            <li><a class="dropdown-item" style="color: white;" href="#" onclick="handleTagClick('Female')">Female</a></li>
+            <li><a class="dropdown-item" style="color: white;" href="#" onclick="handleTagClick('None')">None</a></li>
         </ul>
         <script>
-            function filterCharacters(tag) {
+            fetch('/tags')
+                .then(response => response.json())
+                .then(tags => {
+                    const tagsList = document.getElementById('tagsList');
+                    tags.forEach(tag => {
+                        if (!tagsList.innerHTML.includes(tag)) {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<a class="dropdown-item" style="color: white;" href="#" onclick="handleTagClick('${tag}')">${tag}</a>`;
+                            tagsList.appendChild(li);
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading tags:', error));
+                
+            const selectedTags = new Set();
+
+            function handleTagClick(tag) {
+                if (tag === 'None') {
+                    selectedTags.clear();
+                } else {
+                    selectedTags.add(tag);
+                }
+                updateSelectedTagsDisplay();
+                filterCharacters();
+            }
+
+            function removeTag(tag) {
+                selectedTags.delete(tag);
+                updateSelectedTagsDisplay();
+                filterCharacters();
+            }
+
+            function updateSelectedTagsDisplay() {
+                const container = document.getElementById('selectedTags');
+                container.innerHTML = '';
+                selectedTags.forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'badge bg-primary me-1 mb-1';
+                    tagElement.style.padding = '5px 10px';
+                    tagElement.style.borderRadius = '15px';
+                    tagElement.innerHTML = `${tag} <span style="cursor: pointer; margin-left: 5px" onclick="removeTag('${tag}')">&times;</span>`;
+                    container.appendChild(tagElement);
+                });
+            }
+
+            function filterCharacters() {
                 fetch('/characterdata')
                     .then(response => response.text())
                     .then(data => {
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(data, 'text/html');
                         const characters = Array.from(doc.querySelectorAll('#characters .character'));
-                        const filteredCharacters = tag === 'None' ? characters : characters.filter(character => character.dataset.tags.includes(tag));
+                        const filteredCharacters = selectedTags.size === 0 ? 
+                            characters : 
+                            characters.filter(character => 
+                                Array.from(selectedTags).every(tag => 
+                                    character.dataset.tags.includes(tag)
+                                )
+                            );
                         const charactersContainer = document.getElementById('characters');
                         charactersContainer.innerHTML = '';
                         filteredCharacters.forEach(character => charactersContainer.appendChild(character));
                     });
             }
         </script>
+    </div>
     </div>
     <script>
         const searchInput = document.querySelector('.search-input');
