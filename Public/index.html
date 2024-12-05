@@ -112,6 +112,55 @@
     </style>
 </head>
 <body>
+    <div id="loadingPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="text-align: center; color: white;">
+            <div style="margin-bottom: 20px;">Loading...</div>
+            <div style="width: 100%; background-color: #555; border-radius: 5px;">
+                <div id="loadingBar" style="width: 0%; height: 20px; background-color: #007bff; border-radius: 5px;"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function showLoadingPopup() {
+            const loadingPopup = document.getElementById('loadingPopup');
+            loadingPopup.style.display = 'flex';
+            let width = 0;
+            const loadingBar = document.getElementById('loadingBar');
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                } else {
+                    width++;
+                    loadingBar.style.width = width + '%';
+                }
+            }, 30);
+        }
+
+        function hideLoadingPopup() {
+            const loadingPopup = document.getElementById('loadingPopup');
+            loadingPopup.style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const fetchCharacters = () => {
+                const startTime = performance.now();
+                showLoadingPopup();
+                fetch('https://server-hhcx.onrender.com/characters')
+                    .then(response => response.text())
+                    .then(data => {
+                        const charactersContainer = document.getElementById('characters');
+                        charactersContainer.innerHTML = data;
+                        const endTime = performance.now();
+                        document.getElementById('time').textContent = `Characters loaded in ${(endTime - startTime).toFixed(2)} ms`;
+                        hideLoadingPopup();
+                    })
+                    .catch(error => {
+                        console.error('Error loading characters:', error);
+                        hideLoadingPopup();
+                    });
+            };
+        });
+    </script>
     <div class="text-center mt-3">
         <a href="http://agaga.com" class="d-inline-block rounded overflow-hidden shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-105" style="font-weight: bold;">
             <img src="./IMAGES/footer.png" alt="Footer Image" class="rounded" style="max-width: 40%; height: auto; border-radius: 20px; filter: brightness(1.1); padding: 8px;">
@@ -369,7 +418,7 @@
     <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function customAlert(message) {
+    function customAlert(message) {
     const alertBox = document.createElement('div');
     alertBox.style.position = 'fixed';
     alertBox.style.top = '20px';
