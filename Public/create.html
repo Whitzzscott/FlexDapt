@@ -80,65 +80,84 @@
         <div class="creation-form">
             <form id="characterForm">
                 <div class="mb-3">
-                    <label for="importButton" class="form-label">Import Character</label>
-                    <button type="button" class="btn" id="importButton">Import</button>
+                    <label for="fileInput" class="form-label">Import Character</label>
+                    <input type="file" class="form-control" id="fileInput" accept=".json, .txt">
+                    <button type="button" id="importButton" class="btn btn-primary mt-2">Import</button>
                 </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        document.getElementById('importButton').addEventListener('click', () => {
+                            const characterData = {
+                                char_name: "",
+                                char_persona: "",
+                                char_greeting: "",
+                                world_scenario: "",
+                                example_dialogue: "",
+                                name: "",
+                                description: "",
+                                first_mes: "",
+                                scenario: "",
+                                mes_example: "",
+                                personality: ""
+                            };
+
+                            document.getElementById('name').value = characterData.char_name;
+                            document.getElementById('description').value = characterData.description;
+                            document.getElementById('persona').value = characterData.char_persona + ' ' + characterData.personality;
+                            document.getElementById('firstMessage').value = characterData.char_greeting;
+                            document.getElementById('modelInstructions').value = characterData.mes_example;
+                            document.getElementById('system').value = characterData.scenario;
+                        });
+                    });
+                </script>
                 <div class="mb-3">
                     <label for="name" class="form-label">Character Name</label>
+                    <button type="button" class="btn btn-sm info-btn" data-info="Enter the name of your character." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
                     <input type="text" class="form-control" id="name" required>
                 </div>
                 
                 <div class="mb-3">
                     <label for="photo" class="form-label">Character Photo URL</label>
+                    <button type="button" class="btn btn-sm info-btn" data-info="Provide a URL link to your character's photo." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
                     <input type="url" class="form-control" id="photo" required>
                 </div>
                 
                 <div class="mb-3">
                     <label for="description" class="form-label">Character Description</label>
+                    <button type="button" class="btn btn-sm info-btn" data-info="Describe your character's traits and background." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
                     <textarea class="form-control" id="description" required></textarea>
                 </div>
 
                 <div class="mb-3">
                     <label for="persona" class="form-label">Persona</label>
+                    <button type="button" class="btn btn-sm info-btn" data-info="Define your character's persona and personality traits." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
                     <textarea class="form-control" id="persona" required></textarea>
                 </div>
 
                 <div class="mb-3">
                     <label for="modelInstructions" class="form-label">Character Model Instructions</label>
+                    <button type="button" class="btn btn-sm info-btn" data-info="Provide instructions for the character model." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
                     <textarea class="form-control" id="modelInstructions" required></textarea>
                 </div>
 
                 <div class="mb-3">
                     <label for="firstMessage" class="form-label">First Message</label>
+                    <button type="button" class="btn btn-sm info-btn" data-info="Enter the first message your character will say." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
                     <textarea class="form-control" id="firstMessage" required></textarea>
                 </div>
 
                 <div class="mb-3">
                     <label for="system" class="form-label">Character System</label>
+                    <button type="button" class="btn btn-sm info-btn" data-info="Specify the system your character operates within." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
                     <textarea class="form-control" id="system" required></textarea>
                 </div>
-                <script>
-                    document.getElementById('importButton').addEventListener('click', () => {
-                        const characterData = {
-                            char_name: "",
-                            char_persona: "",
-                            char_greeting: "",
-                            world_scenario: "",
-                            example_dialogue: "",
-                            name: "",
-                            description: "",
-                            first_mes: "",
-                            scenario: "",
-                            mes_example: "",
-                            personality: ""
-                        };
 
-                        document.getElementById('name').value = characterData.char_name;
-                        document.getElementById('description').value = characterData.description;
-                        document.getElementById('persona').value = characterData.char_persona + ' ' + characterData.personality;
-                        document.getElementById('firstMessage').value = characterData.char_greeting;
-                        document.getElementById('modelInstructions').value = characterData.mes_example;
-                        document.getElementById('system').value = characterData.scenario;
+                <script>
+                    document.querySelectorAll('.info-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const info = this.getAttribute('data-info');
+                            window.alert(info);
+                        });
                     });
                 </script>
 
@@ -167,7 +186,7 @@
             </form>
         </div>
     </div>
-
+    <script src="mods.js"></script>
     <script>
         document.getElementById('characterForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -231,6 +250,7 @@
                 alert("Please enter a custom tag");
             }
         });
+        mods()
     </script>
 </body>
 </html>
