@@ -80,33 +80,53 @@
         <div class="creation-form">
             <form id="characterForm">
                 <div class="mb-3">
-                    <label for="fileInput" class="form-label">Import Character</label>
+                    <label for="fileInput" class="form-label">Import Character from File</label>
                     <input type="file" class="form-control" id="fileInput" accept=".json, .txt">
+                    <label for="urlInput" class="form-label mt-2">Import Character from URL</label>
+                    <textarea class="form-control" id="urlInput" placeholder="Enter character URL"></textarea>
                     <button type="button" id="importButton" class="btn btn-primary mt-2">Import</button>
                 </div>
                 <script>
                     document.addEventListener('DOMContentLoaded', () => {
                         document.getElementById('importButton').addEventListener('click', () => {
-                            const characterData = {
-                                char_name: "",
-                                char_persona: "",
-                                char_greeting: "",
-                                world_scenario: "",
-                                example_dialogue: "",
-                                name: "",
-                                description: "",
-                                first_mes: "",
-                                scenario: "",
-                                mes_example: "",
-                                personality: ""
-                            };
-
-                            document.getElementById('name').value = characterData.char_name;
-                            document.getElementById('description').value = characterData.description;
-                            document.getElementById('persona').value = characterData.char_persona + ' ' + characterData.personality;
-                            document.getElementById('firstMessage').value = characterData.char_greeting;
-                            document.getElementById('modelInstructions').value = characterData.mes_example;
-                            document.getElementById('system').value = characterData.scenario;
+                            const fileInput = document.getElementById('fileInput');
+                            const urlInput = document.getElementById('urlInput');
+                            const file = fileInput.files[0];
+                            
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    try {
+                                        const characterData = JSON.parse(e.target.result);
+                                        
+                                        document.getElementById('name').value = characterData.char_name || characterData.name || '';
+                                        document.getElementById('description').value = characterData.description || '';
+                                        document.getElementById('persona').value = (characterData.char_persona || '') + ' ' + (characterData.personality || '');
+                                        document.getElementById('firstMessage').value = characterData.char_greeting || characterData.first_mes || '';
+                                        document.getElementById('modelInstructions').value = characterData.example_dialogue || characterData.mes_example || '';
+                                        document.getElementById('system').value = characterData.world_scenario || characterData.scenario || '';
+                                    } catch (error) {
+                                        alert('Error parsing character file. Please ensure it is valid JSON format.');
+                                    }
+                                };
+                                reader.readAsText(file);
+                            } else if (urlInput.value.trim()) {
+                                fetch(urlInput.value.trim())
+                                    .then(response => response.json())
+                                    .then(characterData => {
+                                        document.getElementById('name').value = characterData.char_name || characterData.name || '';
+                                        document.getElementById('description').value = characterData.description || '';
+                                        document.getElementById('persona').value = (characterData.char_persona || '') + ' ' + (characterData.personality || '');
+                                        document.getElementById('firstMessage').value = characterData.char_greeting || characterData.first_mes || '';
+                                        document.getElementById('modelInstructions').value = characterData.example_dialogue || characterData.mes_example || '';
+                                        document.getElementById('system').value = characterData.world_scenario || characterData.scenario || '';
+                                    })
+                                    .catch(error => {
+                                        alert('Error fetching or parsing URL data. Please ensure the URL is valid and returns JSON.');
+                                    });
+                            } else {
+                                alert('Please select a file or enter a URL to import');
+                            }
                         });
                     });
                 </script>
@@ -148,8 +168,8 @@
 
                 <div class="mb-3">
                     <label for="system" class="form-label">Character System</label>
-                    <button type="button" class="btn btn-sm info-btn" data-info="Specify the system your character operates within." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
-                    <textarea class="form-control" id="system" required></textarea>
+                    <button type="button" class="btn btn-sm info-btn" data-info="Specify the Important Model Instructions Your Character Must Always Follow Whenever generating an output." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
+                    <textarea class="form-control" id="system" required>Act Like A Neko Girl</textarea>
                 </div>
 
                 <script>
