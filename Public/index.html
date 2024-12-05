@@ -256,7 +256,7 @@
             <li><a class="dropdown-item" style="color: white;" href="#" onclick="handleTagClick('None')">None</a></li>
         </ul>
         <script>
-            fetch('/tags')
+            fetch('https://server-hhcx.onrender.com/tags')
                 .then(response => response.json())
                 .then(tags => {
                     const tagsList = document.getElementById('tagsList');
@@ -302,7 +302,7 @@
             }
 
             function filterCharacters() {
-                fetch('/characterdata')
+                fetch('https://server-hhcx.onrender.com/characterdata')
                     .then(response => response.text())
                     .then(data => {
                         const parser = new DOMParser();
