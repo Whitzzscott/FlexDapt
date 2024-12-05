@@ -414,10 +414,10 @@
             try {     
                 const characterIdResponse = await fetch('https://server-hhcx.onrender.com/id/get', { method: 'GET' });
                 if (!characterIdResponse.ok) {
-                    throw new Error('Error fetching character ID: ' + characterIdResponse.statusText);
+                    throw new Error('Error getting character ID');
                 }
                 const characterIdData = await characterIdResponse.json();
-                const characterId = characterIdData.characterId !== undefined ? characterIdData.characterId : null;
+                const characterId = characterIdData.characterId || null;
                 const characterResponse = await fetch(`https://server-hhcx.onrender.com/characterdata/id?id=${characterId}`, { method: 'GET' });
                 const characterDATA = await characterResponse.json();
                 const settings = JSON.parse(localStorage.getItem('settings')) || {};
