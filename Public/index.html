@@ -112,14 +112,29 @@
     </style>
 </head>
 <body>
-    <div id="loadingPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="text-align: center; color: white;">
-            <div style="margin-bottom: 20px;">Loading...</div>
-            <div style="width: 100%; background-color: #555; border-radius: 5px;">
-                <div id="loadingBar" style="width: 0%; height: 20px; background-color: #007bff; border-radius: 5px;"></div>
+    <div id="loadingPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); z-index: 9999; justify-content: center; align-items: center; animation: fadeIn 0.5s;">
+        <div style="text-align: center; color: white; animation: slideIn 0.5s;">
+            <div style="margin-bottom: 20px; font-size: 1.5em; font-weight: bold;">Loading...</div>
+            <div style="width: 100%; background-color: #555; border-radius: 5px; overflow: hidden;">
+                <div id="loadingBar" style="width: 0%; height: 20px; background-color: #007bff; border-radius: 5px; animation: loading 2s infinite;"></div>
             </div>
         </div>
     </div>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); }
+            to { transform: translateY(0); }
+        }
+        @keyframes loading {
+            0% { width: 0%; }
+            50% { width: 100%; }
+            100% { width: 0%; }
+        }
+    </style>
     <script>
         function showLoadingPopup() {
             const loadingPopup = document.getElementById('loadingPopup');
