@@ -156,13 +156,118 @@
 
 <body>
     <div class="sidebar">
-        <h3><i class="fas fa-robot"></i> Creative Helper</h3>
+        <h3><i class="fas fa-robot"></i> <span id="sidebarCharacterName">Loading...</span></h3>
         <div class="btn-group">
-            <button class="btn"><i class="fas fa-plus"></i> New Chat</button>
-            <button class="btn"><i class="fas fa-cog"></i> Settings</button>
-            <button class="btn"><i class="fas fa-question-circle"></i> Help</button>
+            <button class="btn" onclick="window.location.href='chats.html'"><i class="fas fa-comments"></i> Chats</button>
+            <button class="btn" onclick="clearChat()"><i class="fas fa-plus"></i> New Chat</button>
+            <button class="btn" onclick="toggleSettings()"><i class="fas fa-cog"></i> Settings</button>
+            <button class="btn" onclick="window.location.href='guideline.html'"><i class="fas fa-question-circle"></i> Help</button>
+        </div>
+        <div id="settingsMenu" class="settings-menu">
+            <div class="settings-content">
+                <div class="settings-header">
+                    <h4>Settings</h4>
+                    <button onclick="toggleSettings()" class="close-btn"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="settings-options">
+                    <div class="setting-item">
+                        <label>Theme</label>
+                        <select>
+                            <option>Dark</option>
+                            <option>Light</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>Font Size</label>
+                        <select>
+                            <option>Small</option>
+                            <option>Medium</option>
+                            <option>Large</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <style>
+        .settings-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: #2a2a2a;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+            transition: right 0.3s ease-in-out;
+            z-index: 1000;
+        }
+        .settings-menu.active {
+            right: 0;
+        }
+        .settings-content {
+            padding: 20px;
+        }
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .settings-header h4 {
+            color: #4a90e2;
+            margin: 0;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .settings-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+        }
+        .setting-item select {
+            background: #3a3a3a;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+    </style>
+    <script>
+        fetch('https://server-hhcx.onrender.com/api/id/get')
+            .then(response => response.json())
+            .then(data => fetch('https://server-hhcx.onrender.com/characterdata/id?id=' + data.characterId))
+            .then(response => response.json())
+            .then(characterResponse => {
+                const decodedData = JSON.parse(atob(characterResponse.data));
+                document.getElementById('sidebarCharacterName').textContent = decodedData.name;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('sidebarCharacterName').textContent = 'Creative Helper';
+            });
+
+        function clearChat() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML = '';
+            window.location.href = 'chats.html';
+        }
+
+        function toggleSettings() {
+            const settingsMenu = document.getElementById('settingsMenu');
+            settingsMenu.classList.toggle('active');
+        }
+    </script>
 <style>
         .sidebar {
             width: 250px;
@@ -371,6 +476,139 @@
                     timeStamp.innerText = currentTime.getHours() + ':' + String(currentTime.getMinutes()).padStart(2, '0');
                     messageElement.appendChild(timeStamp);
 
+                    messageElement.addEventListener('contextmenu', function(e) {
+                        e.preventDefault();
+                        // Remove any existing context menus
+                        const existingMenus = document.querySelectorAll('.context-menu');
+                        existingMenus.forEach(menu => menu.remove());
+
+                        const contextMenu = document.createElement('div');
+                        contextMenu.classList.add('context-menu');
+                        contextMenu.style.position = 'fixed';
+                        contextMenu.style.left = e.pageX + 'px';
+                        contextMenu.style.top = e.pageY + 'px';
+                        contextMenu.style.backgroundColor = '#1a1a1a';
+                        contextMenu.style.border = '1px solid #333';
+                        contextMenu.style.borderRadius = '8px';
+                        contextMenu.style.padding = '8px 0';
+                        contextMenu.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+                        contextMenu.style.zIndex = '1000';
+                        contextMenu.style.animation = 'fadeIn 0.2s ease-out';
+
+                        const menuItems = [
+                            { text: 'Remove', action: () => messageElement.remove() },
+                            { text: 'Copy', action: () => {
+                                navigator.clipboard.writeText(messageContent.innerText);
+                            }},
+                            { text: 'Edit', action: () => {
+                                const newText = prompt('Edit message:', messageContent.innerText);
+                                if (newText !== null) {
+                                    messageContent.innerText = newText;
+                                }
+                            }}
+                        ];
+
+                        menuItems.forEach(item => {
+                            const menuItem = document.createElement('div');
+                            menuItem.innerText = item.text;
+                            menuItem.style.padding = '10px 24px';
+                            menuItem.style.cursor = 'pointer';
+                            menuItem.style.color = '#fff';
+                            menuItem.style.fontSize = '14px';
+                            menuItem.style.transition = 'all 0.2s ease';
+                            menuItem.addEventListener('mouseover', () => {
+                                menuItem.style.backgroundColor = '#333';
+                                menuItem.style.transform = 'translateX(4px)';
+                            });
+                            menuItem.addEventListener('mouseout', () => {
+                                menuItem.style.backgroundColor = 'transparent';
+                                menuItem.style.transform = 'translateX(0)';
+                            });
+                            menuItem.addEventListener('click', () => {
+                                item.action();
+                                contextMenu.remove();
+                            });
+                            contextMenu.appendChild(menuItem);
+                        });
+
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            @keyframes fadeIn {
+                                from { opacity: 0; transform: scale(0.95); }
+                                to { opacity: 1; transform: scale(1); }
+                            }
+                        `;
+                        document.head.appendChild(style);
+
+                        document.body.appendChild(contextMenu);
+
+                        document.addEventListener('click', function closeMenu() {
+                            contextMenu.remove();
+                            document.removeEventListener('click', closeMenu);
+                        });
+                    });
+
+                    messageElement.addEventListener('touchstart', function(e) {
+                        let timer = setTimeout(() => {
+                            e.preventDefault();
+                            const existingMenus = document.querySelectorAll('.context-menu');
+                            existingMenus.forEach(menu => menu.remove());
+
+                            const touch = e.touches[0];
+                            const contextMenu = document.createElement('div');
+                            contextMenu.classList.add('context-menu');
+                            contextMenu.style.position = 'fixed';
+                            contextMenu.style.left = touch.pageX + 'px';
+                            contextMenu.style.top = touch.pageY + 'px';
+                            contextMenu.style.backgroundColor = '#1a1a1a';
+                            contextMenu.style.border = '1px solid #333';
+                            contextMenu.style.borderRadius = '8px';
+                            contextMenu.style.padding = '8px 0';
+                            contextMenu.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+                            contextMenu.style.zIndex = '1000';
+                            contextMenu.style.animation = 'fadeIn 0.2s ease-out';
+
+                            const menuItems = [
+                                { text: 'Remove', action: () => messageElement.remove() },
+                                { text: 'Copy', action: () => {
+                                    navigator.clipboard.writeText(messageContent.innerText);
+                                }},
+                                { text: 'Edit', action: () => {
+                                    const newText = prompt('Edit message:', messageContent.innerText);
+                                    if (newText !== null) {
+                                        messageContent.innerText = newText;
+                                    }
+                                }}
+                            ];
+
+                            menuItems.forEach(item => {
+                                const menuItem = document.createElement('div');
+                                menuItem.innerText = item.text;
+                                menuItem.style.padding = '10px 24px';
+                                menuItem.style.cursor = 'pointer';
+                                menuItem.style.color = '#fff';
+                                menuItem.style.fontSize = '14px';
+                                menuItem.style.transition = 'all 0.2s ease';
+                                menuItem.addEventListener('click', () => {
+                                    item.action();
+                                    contextMenu.remove();
+                                });
+                                contextMenu.appendChild(menuItem);
+                            });
+
+                            document.body.appendChild(contextMenu);
+
+                            document.addEventListener('click', function closeMenu() {
+                                contextMenu.remove();
+                                document.removeEventListener('click', closeMenu);
+                            });
+                        }, 500);
+
+                        messageElement.addEventListener('touchend', () => {
+                            clearTimeout(timer);
+                        });
+                    });
+
                     chatBox.appendChild(messageElement);
                     chatBox.scrollTop = chatBox.scrollHeight;
                 } catch (error) {
@@ -444,6 +682,245 @@
                     botMessageElement.appendChild(botTimeStamp);
 
                     chatBox.appendChild(botMessageElement);
+
+                    let activeMenu = null;
+
+                    botMessageElement.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        
+                        if (activeMenu) {
+                            activeMenu.remove();
+                        }
+
+                        const menu = document.createElement('div');
+                        menu.style.position = 'fixed';
+                        menu.style.left = e.pageX + 'px';
+                        menu.style.top = e.pageY + 'px';
+                        menu.style.backgroundColor = 'rgba(0,0,0,0.95)';
+                        menu.style.backdropFilter = 'blur(10px)';
+                        menu.style.border = '1px solid rgba(255,255,255,0.1)';
+                        menu.style.padding = '12px';
+                        menu.style.borderRadius = '12px';
+                        menu.style.boxShadow = '0 8px 32px rgba(0,0,0,0.4)';
+                        menu.style.opacity = '0';
+                        menu.style.transform = 'scale(0.95) translateY(10px)';
+                        menu.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+                        const menuItems = [
+                            {text: 'Copy', action: () => {
+                                navigator.clipboard.writeText(botMessageContent.innerText);
+                            }},
+                            {text: 'Edit', action: () => {
+                                const input = document.createElement('textarea');
+                                input.value = botMessageContent.innerText;
+                                input.style.width = '100%';
+                                input.style.minHeight = '100px';
+                                input.style.padding = '8px';
+                                input.style.backgroundColor = '#222';
+                                input.style.color = '#fff';
+                                input.style.border = '1px solid #444';
+                                input.style.borderRadius = '4px';
+                                botMessageContent.innerHTML = '';
+                                botMessageContent.appendChild(input);
+                                input.focus();
+                                
+                                input.addEventListener('blur', () => {
+                                    botMessageContent.innerText = input.value;
+                                });
+                            }},
+                            {text: 'Regenerate', action: async () => {
+                                botMessageElement.remove();
+                                handleMessage();
+                            }},
+                            {text: 'Continue', action: async () => {
+                                const currentText = botMessageContent.innerText;
+                                handleMessage(`Continue from: ${currentText}`);
+                            }},
+                            {text: 'Rewind', action: () => {
+                                const messages = chatBox.querySelectorAll('.message');
+                                let found = false;
+                                messages.forEach(msg => {
+                                    if (found) {
+                                        msg.style.opacity = '0';
+                                        msg.style.transform = 'scale(0.9)';
+                                        setTimeout(() => msg.remove(), 300);
+                                    }
+                                    if (msg === botMessageElement) found = true;
+                                });
+                            }},
+                            {text: 'Delete', action: () => {
+                                botMessageElement.style.opacity = '0';
+                                botMessageElement.style.transform = 'scale(0.9)';
+                                setTimeout(() => botMessageElement.remove(), 300);
+                            }}
+                        ];
+
+                        menu.innerHTML = menuItems.map(item => `
+                            <div class="menu-item" style="
+                                cursor: pointer;
+                                padding: 10px 20px;
+                                color: white;
+                                font-size: 14px;
+                                display: flex;
+                                align-items: center;
+                                gap: 12px;
+                                border-radius: 8px;
+                                transition: all 0.3s;
+                                margin: 4px 0;
+                                background: transparent;
+                                transform: translateX(0);
+                            " onmouseover="this.style.transform='translateX(8px)';this.style.background='rgba(255,255,255,0.1)'" 
+                               onmouseout="this.style.transform='translateX(0)';this.style.background='transparent'">
+                                <span>${item.text}</span>
+                            </div>
+                        `).join('');
+
+                        document.body.appendChild(menu);
+                        activeMenu = menu;
+
+                        const menuItems_elements = menu.querySelectorAll('.menu-item');
+                        menuItems_elements.forEach((element, index) => {
+                            element.addEventListener('click', () => {
+                                menuItems[index].action();
+                                menu.remove();
+                            });
+                        });
+
+                        requestAnimationFrame(() => {
+                            menu.style.opacity = '1';
+                            menu.style.transform = 'scale(1) translateY(0)';
+                        });
+
+                        document.addEventListener('click', function closeMenu(e) {
+                            if (!menu.contains(e.target)) {
+                                menu.style.opacity = '0';
+                                menu.style.transform = 'scale(0.95) translateY(10px)';
+                                setTimeout(() => menu.remove(), 300);
+                                document.removeEventListener('click', closeMenu);
+                            }
+                        });
+                    });
+
+                    let longPressTimer;
+                    botMessageElement.addEventListener('touchstart', () => {
+                        longPressTimer = setTimeout(() => {
+                            if (activeMenu) {
+                                activeMenu.remove();
+                            }
+
+                            const menu = document.createElement('div');
+                            menu.style.position = 'fixed';
+                            menu.style.left = '50%';
+                            menu.style.top = '50%';
+                            menu.style.width = '80%';
+                            menu.style.maxWidth = '300px';
+                            menu.style.transform = 'translate(-50%, -50%) scale(0.95)';
+                            menu.style.backgroundColor = 'rgba(0,0,0,0.95)';
+                            menu.style.backdropFilter = 'blur(10px)';
+                            menu.style.border = '1px solid rgba(255,255,255,0.1)';
+                            menu.style.padding = '16px';
+                            menu.style.borderRadius = '16px';
+                            menu.style.boxShadow = '0 8px 32px rgba(0,0,0,0.4)';
+                            menu.style.opacity = '0';
+                            menu.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+                            const menuItems = [
+                                {text: 'Copy', action: () => {
+                                    navigator.clipboard.writeText(botMessageContent.innerText);
+                                }},
+                                {text: 'Edit', action: () => {
+                                    const input = document.createElement('textarea');
+                                    input.value = botMessageContent.innerText;
+                                    input.style.width = '100%';
+                                    input.style.minHeight = '100px';
+                                    input.style.padding = '8px';
+                                    input.style.backgroundColor = '#222';
+                                    input.style.color = '#fff';
+                                    input.style.border = '1px solid #444';
+                                    input.style.borderRadius = '4px';
+                                    botMessageContent.innerHTML = '';
+                                    botMessageContent.appendChild(input);
+                                    input.focus();
+                                    
+                                    input.addEventListener('blur', () => {
+                                        botMessageContent.innerText = input.value;
+                                    });
+                                }},
+                                {text: 'Regenerate', action: async () => {
+                                    botMessageElement.remove();
+                                    handleMessage();
+                                }},
+                                {text: 'Continue', action: async () => {
+                                    const currentText = botMessageContent.innerText;
+                                    handleMessage(`Continue from: ${currentText}`);
+                                }},
+                                {text: 'Rewind', action: () => {
+                                    const messages = chatBox.querySelectorAll('.message');
+                                    let found = false;
+                                    messages.forEach(msg => {
+                                        if (found) {
+                                            msg.style.opacity = '0';
+                                            msg.style.transform = 'scale(0.9)';
+                                            setTimeout(() => msg.remove(), 300);
+                                        }
+                                        if (msg === botMessageElement) found = true;
+                                    });
+                                }},
+                                {text: 'Delete', action: () => {
+                                    botMessageElement.style.opacity = '0';
+                                    botMessageElement.style.transform = 'scale(0.9)';
+                                    setTimeout(() => botMessageElement.remove(), 300);
+                                }}
+                            ];
+
+                            menu.innerHTML = menuItems.map(item => `
+                                <div class="menu-item" style="
+                                    cursor: pointer;
+                                    padding: 12px 24px;
+                                    color: white;
+                                    font-size: 16px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    border-radius: 8px;
+                                    transition: all 0.3s;
+                                    margin: 8px 0;
+                                    background: transparent;
+                                    transform: translateY(0);
+                                " onmouseover="this.style.transform='translateY(-4px)';this.style.background='rgba(255,255,255,0.1)'" 
+                                   onmouseout="this.style.transform='translateY(0)';this.style.background='transparent'">
+                                    <span>${item.text}</span>
+                                </div>
+                            `).join('');
+
+                            document.body.appendChild(menu);
+                            activeMenu = menu;
+
+                            const menuItems_elements = menu.querySelectorAll('.menu-item');
+                            menuItems_elements.forEach((element, index) => {
+                                element.addEventListener('click', () => {
+                                    menuItems[index].action();
+                                    menu.remove();
+                                });
+                            });
+
+                            requestAnimationFrame(() => {
+                                menu.style.opacity = '1';
+                                menu.style.transform = 'translate(-50%, -50%) scale(1)';
+                            });
+
+                            document.addEventListener('click', function closeMenu() {
+                                menu.style.opacity = '0';
+                                menu.style.transform = 'translate(-50%, -50%) scale(0.95)';
+                                setTimeout(() => menu.remove(), 300);
+                                document.removeEventListener('click', closeMenu);
+                            });
+                        }, 500);
+                    });
+
+                    botMessageElement.addEventListener('touchend', () => {
+                        clearTimeout(longPressTimer);
+                    });
 
                     for (let i = 0; i < data.result.response.length; i++) {
                         botMessageContent.innerText = data.result.response.substring(0, i + 1);
