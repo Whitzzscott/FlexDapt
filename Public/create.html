@@ -77,6 +77,18 @@
 <body>
     <div class="container">
         <h1 class="text-center mb-5">Character Creation Studio</h1>
+        <div class="text-center mb-4">
+            <a href="guideline.html">
+                <img src="IMAGES/Guidelines.png" alt="Guidelines" class="img-fluid" style="max-width: 200px; cursor: pointer; transition: transform 0.3s ease, opacity 0.3s ease; animation: float 3s ease-in-out infinite;" onmouseover="this.style.transform='scale(1.2)'; this.style.opacity='0.8'" onmouseout="this.style.transform='scale(1)'; this.style.opacity='1'">
+            </a>
+        </div>
+        <style>
+            @keyframes float {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+                100% { transform: translateY(0px); }
+            }
+        </style>
         <div class="creation-form">
             <form id="characterForm">
                 <div class="mb-3">
@@ -133,7 +145,7 @@
                 <div class="mb-3">
                     <label for="name" class="form-label">Character Name</label>
                     <button type="button" class="btn btn-sm info-btn" data-info="Enter the name of your character." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
-                    <input type="text" class="form-control" id="name" required>
+                    <input type="text" class="form-control" id="name" required maxlength="1500" pattern="^[^🔥😊\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]*$">
                 </div>
                 
                 <div class="mb-3">
@@ -145,31 +157,31 @@
                 <div class="mb-3">
                     <label for="description" class="form-label">Character Description</label>
                     <button type="button" class="btn btn-sm info-btn" data-info="Describe your character's traits and background." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
-                    <textarea class="form-control" id="description" required></textarea>
+                    <textarea class="form-control" id="description" required maxlength="12000"></textarea>
                 </div>
 
                 <div class="mb-3">
                     <label for="persona" class="form-label">Persona</label>
                     <button type="button" class="btn btn-sm info-btn" data-info="Define your character's persona and personality traits." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
-                    <textarea class="form-control" id="persona" required></textarea>
+                    <textarea class="form-control" id="persona" required maxlength="12000"></textarea>
                 </div>
 
                 <div class="mb-3">
                     <label for="modelInstructions" class="form-label">Character Model Instructions</label>
                     <button type="button" class="btn btn-sm info-btn" data-info="Provide instructions for the character model." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
-                    <textarea class="form-control" id="modelInstructions" required></textarea>
+                    <textarea class="form-control" id="modelInstructions" required maxlength="12000"></textarea>
                 </div>
 
                 <div class="mb-3">
                     <label for="firstMessage" class="form-label">First Message</label>
                     <button type="button" class="btn btn-sm info-btn" data-info="Enter the first message your character will say." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
-                    <textarea class="form-control" id="firstMessage" required></textarea>
+                    <textarea class="form-control" id="firstMessage" required maxlength="12000"></textarea>
                 </div>
 
                 <div class="mb-3">
                     <label for="system" class="form-label">Character System</label>
                     <button type="button" class="btn btn-sm info-btn" data-info="Specify the Important Model Instructions Your Character Must Always Follow Whenever generating an output." style="background: none; border: none; transition: transform 0.1s;"><i class="bi bi-info-circle"></i></button>
-                    <textarea class="form-control" id="system" required>Act Like A Neko Girl</textarea>
+                    <textarea class="form-control" id="system" required maxlength="12000">Act Like A Neko Girl</textarea>
                 </div>
 
                 <script>
@@ -180,27 +192,301 @@
                         });
                     });
                 </script>
-
+                <div class="selected-tags mb-4">
+                    <h6>Selected Tags</h6>
+                    <div class="tag-pills selected-tag-pills" id="selectedTagsList"></div>
+                </div>
                 <div class="mb-3">
-                    <label for="tag" class="form-label">Character Tag</label>
-                    <select class="form-control" id="tag" required>
-                        <option value="">Select a tag...</option>
-                        <option value="Female">Female</option>
-                        <option value="Male">Male</option>
-                        <option value="Fantasy">Fantasy</option>
-                        <option value="Sci-Fi">Sci-Fi</option>
-                        <option value="Hero">Hero</option>
-                        <option value="Villain">Villain</option>
-                    </select>
+                    <button type="button" id="openTagsModal" class="btn btn-primary w-100">
+                        <i class="bi bi-tags-fill me-2"></i>Add Tags
+                    </button>
                 </div>
 
-                <div class="custom-tag-field mb-3">
-                    <label for="customTag" class="form-label">Custom Tag</label>
-                    <div class="input-group">
-                        <input type="text" id="customTag" class="form-control" placeholder="Custom tag" />
-                        <button type="button" id="addTag" class="btn btn-outline-primary">Add Tag</button>
+                <div class="tags-modal" id="tagsModal">
+                    <div class="tags-modal-content">
+                        <div class="tags-modal-header">
+                            <h5>Add Tags</h5>
+                            <button type="button" class="btn-close" id="closeTagsModal"></button>
+                        </div>
+                        <div class="tags-modal-body">
+                            <div class="search-container mb-4">
+                                <input type="text" class="form-control" id="tagSearch" placeholder="Search tags...">
+                            </div>
+
+                            <div class="selected-tags mb-4">
+                                <h6>Selected Tags</h6>
+                                <div class="tag-pills selected-tag-pills" id="selectedTagsList"></div>
+                            </div>
+                            
+                            <div class="trending-tags mb-4">
+                                <h6>Trending Tags</h6>
+                                <div class="tag-pills">
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Female">Female</span>
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Male">Male</span>
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Fantasy">Fantasy</span>
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Sci-Fi">Sci-Fi</span>
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Adventure">Adventure</span>
+                                </div>
+                            </div>
+
+                            <div class="all-tags">
+                                <h6>All Tags</h6>
+                                <div class="tag-pills" id="allTagsList">
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Hero">Hero</span>
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Villain">Villain</span>
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Romance">Romance</span>
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Horror">Horror</span>
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Mystery">Mystery</span>
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Historical">Historical</span>
+                                    <span class="tag-pill" onclick="addTag(this)" data-tag="Comedy">Comedy</span>
+                                </div>
+                            </div>
+
+                            <div class="create-tag-container mt-4">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="newTagInput" placeholder="Create new tag...">
+                                    <button class="btn btn-primary" id="createNewTag" type="button">Create</button>
+                                </div>
+                                <script>
+                                    const createNewTag = async () => {
+                                        const input = document.getElementById('newTagInput');
+                                        const tagName = input.value.trim();
+                                        
+                                        if (tagName) {
+                                            try {
+                                                const response = await fetch('https://server-hhcx.onrender.com/tags', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json'
+                                                    },
+                                                    body: JSON.stringify({ tag: tagName })
+                                                });
+
+                                                if (response.ok) {
+                                                    const selectedTagsList = document.getElementById('selectedTagsList');
+                                                    const allTagsList = document.getElementById('allTagsList');
+                                                    
+                                                    const tagsResponse = await fetch('https://server-hhcx.onrender.com/api/tags/get');
+                                                    const tags = await tagsResponse.json();
+                                                    
+                                                    const newTag = document.createElement('span');
+                                                    newTag.className = 'tag-pill';
+                                                    newTag.setAttribute('data-tag', tagName);
+                                                    newTag.textContent = tagName;
+                                                    newTag.onclick = () => addTag(newTag);
+                                                    
+                                                    selectedTagsList.appendChild(newTag.cloneNode(true));
+                                                    allTagsList.appendChild(newTag);
+                                                    input.value = '';
+                                                }
+                                            } catch (error) {
+                                                console.error('Error creating tag:', error);
+                                            }
+                                        }
+                                    };
+
+                                    document.getElementById('createNewTag').addEventListener('click', createNewTag);
+                                </script>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const openTagsModal = document.getElementById('openTagsModal');
+                        const closeTagsModal = document.getElementById('closeTagsModal');
+                        const tagsModal = document.getElementById('tagsModal');
+                        const tagPills = document.querySelectorAll('.tag-pill');
+                        const tagSearch = document.getElementById('tagSearch');
+                        const modalContent = document.querySelector('.tags-modal-content');
+
+                        openTagsModal.addEventListener('click', () => {
+                            tagsModal.style.display = 'block';
+                            modalContent.style.transform = 'translate(-50%, -50%) scale(1)';
+                            modalContent.style.opacity = '1';
+                        });
+
+                        closeTagsModal.addEventListener('click', () => {
+                            closeModal();
+                        });
+
+                        tagsModal.addEventListener('click', (e) => {
+                            if (e.target === tagsModal) {
+                                closeModal();
+                            }
+                        });
+
+                        function closeModal() {
+                            modalContent.style.transform = 'translate(-50%, -50%) scale(0.8)';
+                            modalContent.style.opacity = '0';
+                            setTimeout(() => {
+                                tagsModal.style.display = 'none';
+                                modalContent.style.transform = 'translate(-50%, -50%) scale(0.8)';
+                            }, 200);
+                        }
+
+                        tagSearch.addEventListener('input', (e) => {
+                            const searchTerm = e.target.value.toLowerCase();
+                            tagPills.forEach(pill => {
+                                const tag = pill.getAttribute('data-tag').toLowerCase();
+                                if (tag.includes(searchTerm)) {
+                                    pill.style.display = '';
+                                    pill.style.animation = 'fadeIn 0.3s ease';
+                                } else {
+                                    pill.style.display = 'none';
+                                }
+                            });
+                        });
+                    });
+
+                    const selectedTags = new Set();
+
+                    function addTag(element) {
+                        const tag = element.getAttribute('data-tag');
+                        if (!selectedTags.has(tag)) {
+                            selectedTags.add(tag);
+                            const selectedTagsList = document.getElementById('selectedTagsList');
+                            const tagElement = document.createElement('span');
+                            tagElement.className = 'tag-pill selected';
+                            tagElement.setAttribute('data-tag', tag);
+                            tagElement.innerHTML = `${tag} <i class="bi bi-x" onclick="removeTag(this.parentElement)"></i>`;
+                            tagElement.style.animation = 'scaleIn 0.2s ease';
+                            selectedTagsList.appendChild(tagElement);
+                            element.classList.add('active');
+                        }
+                    }
+
+                    function removeTag(element) {
+                        const tag = element.getAttribute('data-tag');
+                        element.style.animation = 'scaleOut 0.2s ease';
+                        setTimeout(() => {
+                            selectedTags.delete(tag);
+                            element.remove();
+                            document.querySelector(`[data-tag="${tag}"]:not(.selected)`).classList.remove('active');
+                        }, 180);
+                    }
+
+                    function createTag() {
+                        const input = document.getElementById('newTagInput');
+                        const tag = input.value.trim();
+                        if (tag) {
+                            const allTagsList = document.getElementById('allTagsList');
+                            const tagElement = document.createElement('span');
+                            tagElement.className = 'tag-pill';
+                            tagElement.setAttribute('data-tag', tag);
+                            tagElement.setAttribute('onclick', 'addTag(this)');
+                            tagElement.textContent = tag;
+                            tagElement.style.animation = 'slideIn 0.3s ease';
+                            allTagsList.appendChild(tagElement);
+                            input.value = '';
+                        }
+                    }
+                </script>
+
+                <style>
+                    .tags-modal {
+                        display: none;
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.7);
+                        z-index: 1000;
+                        animation: fadeIn 0.3s;
+                    }
+
+                    .tags-modal-content {
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: #121212;
+                        color: white;
+                        padding: 2rem;
+                        border-radius: 15px;
+                        width: 90%;
+                        max-width: 500px;
+                        animation: slideIn 0.3s;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                    }
+
+                    .tags-modal-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 1.5rem;
+                        border-bottom: 1px solid #333;
+                        padding-bottom: 1rem;
+                    }
+
+                    .btn-close {
+                        background-color: white;
+                    }
+
+                    .tag-pills {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 0.5rem;
+                    }
+
+                    .tag-pill {
+                        padding: 0.5rem 1rem;
+                        background: #2d2d2d;
+                        color: white;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        border: 1px solid #444;
+                    }
+
+                    .tag-pill:hover {
+                        background: #3d3d3d;
+                        transform: translateY(-1px);
+                    }
+
+                    .tag-pill.selected {
+                        background: #007bff;
+                        color: white;
+                        border-color: #0056b3;
+                    }
+
+                    .selected-tags {
+                        background: #1a1a1a;
+                        padding: 1rem;
+                        border-radius: 10px;
+                    }
+
+                    .form-control {
+                        background: #2d2d2d;
+                        border: 1px solid #444;
+                        color: white;
+                    }
+
+                    .form-control:focus {
+                        background: #2d2d2d;
+                        color: white;
+                        border-color: #007bff;
+                        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+                    }
+
+                    .form-control::placeholder {
+                        color: #888;
+                    }
+
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+
+                    @keyframes slideIn {
+                        from { transform: translate(-50%, -60%); opacity: 0; }
+                        to { transform: translate(-50%, -50%); opacity: 1; }
+                    }
+                </style>
+
+                <input type="hidden" id="tag" name="tag" required>
 
                 <button type="submit" class="btn w-100">Save Character</button>
             </form>
