@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guidelines | FlexDapt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        .card {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            margin-bottom: 20px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 20px rgba(74,144,226,0.2);
+        }
+        .card-header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem;
+            border-bottom: 3px solid #357abd;
+        }
+        .list-group-item {
+            background-color: #2d2d2d;
+            color: #fff;
+            border-color: #444;
+            padding: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        .list-group-item:hover {
+            background-color: #363636;
+            transform: translateX(5px);
+        }
+        .btn-primary {
+            background-color: #4a90e2;
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74,144,226,0.4);
+        }
+        .navbar {
+            backdrop-filter: blur(10px);
+            background-color: rgba(33,37,41,0.95) !important;
+        }
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .nav-link {
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #4a90e2;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover:after {
+            width: 100%;
+        }
+        .fas {
+            margin-right: 8px;
+        }
+        .text-danger {
+            color: #ff4d4d !important;
+        }
+        .text-warning {
+            color: #ffd700 !important;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate__float {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top animate__animated animate__slideInDown">
+        <div class="container">
+            <a class="navbar-brand animate__animated animate__fadeIn" href="#">
+                <i class="fas fa-book-open"></i> Guidelines
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link animate__animated animate__fadeIn" href="chatting.html">
+                            <i class="fas fa-comments"></i> Back to Chat
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5 pt-5">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <h1 class="text-center mb-5 animate__animated animate__fadeInDown animate__float">
+                    <i class="fas fa-shield-alt"></i> Community Guidelines
+                </h1>
+
+                <div class="card animate__animated animate__fadeInUp animate__delay-1s">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-exclamation-circle"></i> Restricted Content </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div class="list-group-item animate__animated animate__fadeInLeft animate__delay-1s">
+                                <i class="fas fa-times-circle text-danger"></i> 
+                                <strong>NSFW Content Policy:</strong><br>
+                                - NSFW content is explicitly allowed on FlexDapt<br>
+                                - Exception: Real life/realistic NSFW images<br>
+                                - Verification challenges:<br>
+                                &nbsp;&nbsp;• Age verification (18+)<br>
+                                &nbsp;&nbsp;• Prevention of deepfaked content<br>
+                                &nbsp;&nbsp;• Consent verification<br>
+                                - Only stylized, non-photorealistic NSFW content permitted
+                            </div>
+                            <div class="list-group-item animate__animated animate__fadeInLeft animate__delay-2s">
+                                <i class="fas fa-times-circle text-danger"></i>  
+                                <strong>Prohibited Content:</strong><br>
+                                - Self-harm or suicide-related content<br>
+                                - Gore or extreme violence<br>
+                                - Exploitation of tragedies/current events<br>
+                                - Content that promotes harmful behavior
+                            </div>
+                            <div class="list-group-item animate__animated animate__fadeInLeft animate__delay-3s">
+                                <i class="fas fa-times-circle text-danger"></i> 
+                                <strong>Zero Tolerance for Discrimination:</strong><br>
+                                Hate speech or discrimination based on:<br>
+                                - Race/Ethnicity<br>
+                                - Religion/Beliefs<br>
+                                - Gender Identity<br>
+                                - Nationality<br>
+                                - Sexual Orientation<br>
+                                - Disability<br>
+                                - Age<br>
+                                - Other protected characteristics<br>
+                                <strong>Exception:</strong> Actors in character roles only
+                            </div>
+                            <div class="list-group-item animate__animated animate__fadeInLeft animate__delay-4s">
+                                <i class="fas fa-times-circle text-danger"></i> 
+                                <strong>Criminal Content:</strong><br>
+                                - Glorification of criminals<br>
+                                - Content featuring violent offenders<br>
+                                - Promotion of illegal activities<br>
+                                - Terrorist/extremist content<br>
+                                - Cybercrime promotion
+                            </div>
+                            <div class="list-group-item animate__animated animate__fadeInLeft animate__delay-5s">
+                                <i class="fas fa-times-circle text-danger"></i> 
+                                <strong>Minor Protection Policy:</strong><br>
+                                Strictly prohibited:<br>
+                                - Underage characters (under 18)<br>
+                                - Child-like appearances<br>
+                                - Child-like mental states<br>
+                                - School-age implications<br>
+                                - Youth-targeted media<br>
+                                - Underage user content<br>
+                                <strong class="text-danger">ZERO TOLERANCE FOR MINOR-RELATED CONTENT</strong>
+                            </div>
+                            <div class="list-group-item animate__animated animate__fadeInLeft animate__delay-6s">
+                                <i class="fas fa-times-circle text-danger"></i> 
+                                <strong>Relationship Content:</strong><br>
+                                Prohibited:<br>
+                                - Incestuous scenarios<br>
+                                - NSFW family roleplay<br>
+                                Permitted:<br>
+                                - Non-blood relations (step-family, in-laws)
+                            </div>
+                            <div class="list-group-item animate__animated animate__fadeInLeft animate__delay-7s">
+                                <i class="fas fa-times-circle text-danger"></i> 
+                                <strong>Content Restrictions:</strong><br>
+                                Prohibited:<br>
+                                - Bestiality<br>
+                                - Non-anthropomorphic animal content<br>
+                                - Necrophilic themes<br>
+                                Permitted:<br>
+                                - Harkness test-passing characters<br>
+                                - Stylized anthropomorphic characters<br>
+                                - Non-realistic anthropomorphic art<br>
+                                <strong>Content Warnings Required:</strong><br>
+                                - Disturbing content warnings<br>
+                                - Extreme fetish content tags<br>
+                                - NSFW tag requirement<br>
+                                - Clear content descriptions<br>
+                                - User control mechanisms
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card animate__animated animate__fadeInUp animate__delay-8s">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-star"></i> Enforcement Policy</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div class="list-group-item animate__animated animate__fadeInRight animate__delay-9s">
+                                <i class="fas fa-lightbulb text-warning"></i>
+                                <strong>First Violation:</strong><br>
+                                - Content removal<br>
+                                - Account warning<br>
+                                - Temporary restrictions<br>
+                                - Database record
+                            </div>
+                            <div class="list-group-item animate__animated animate__fadeInRight animate__delay-10s">
+                                <i class="fas fa-lightbulb text-warning"></i>
+                                <strong>Repeated Violations:</strong><br>
+                                - Account suspension<br>
+                                - IP ban implementation<br>
+                                - Permanent platform removal<br>
+                                - Legal action if necessary
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="chatting.html" class="btn btn-primary btn-lg animate__animated animate__pulse animate__infinite">
+                        <i class="fas fa-arrow-left"></i> Return to Chat
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
