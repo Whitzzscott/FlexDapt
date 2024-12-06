@@ -247,18 +247,247 @@
                     });
                 }
             }
-
             function fetchCharacters() {
                 const startTime = performance.now();
                 fetch('https://server-hhcx.onrender.com/characters')
-                    .then(response => response.text())
-                    .then(data => {
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(response => {
+                        const decodedData = JSON.parse(atob(response.data));
                         const charactersContainer = document.getElementById('characters');
-                        charactersContainer.innerHTML = data;
+                        charactersContainer.style.cssText = `
+                            display: grid;
+                            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                            gap: 20px;
+                            padding: 20px;
+                            max-width: 1200px;
+                            margin: 0 auto;
+                        `;
+
+                        charactersContainer.innerHTML = decodedData.map(character => {
+                            const truncatedDesc = character.description.length > 100 ? 
+                                character.description.substring(0, 100) + '...' : 
+                                character.description;
+
+                            return `
+                                <div class="character-card animate__animated animate__fadeIn" 
+                                     onclick="showExpandedCard(${JSON.stringify(character).replace(/"/g, '&quot;')})"
+                                     style="background: rgba(0,0,0,0.8); 
+                                            border-radius: 15px;
+                                            padding: 20px;
+                                            width: 100%;
+                                            height: 100%;
+                                            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                                            transition: transform 0.3s ease, box-shadow 0.3s ease;
+                                            cursor: pointer;
+                                            display: flex;
+                                            flex-direction: column;">
+                                    <div style="position: relative;
+                                                width: 100%;
+                                                padding-top: 66.67%;
+                                                margin-bottom: 15px;">
+                                        <img src="${character.photo}" 
+                                             alt="${character.name}"
+                                             style="position: absolute;
+                                                    top: 0;
+                                                    left: 0;
+                                                    width: 100%;
+                                                    height: 100%;
+                                                    object-fit: cover;
+                                                    border-radius: 10px;">
+                                    </div>
+                                    <h3 style="color: #fff;
+                                             font-size: 1.5rem;
+                                             margin-bottom: 10px;
+                                             font-weight: bold;
+                                             overflow: hidden;
+                                             text-overflow: ellipsis;
+                                             white-space: nowrap;">${character.name}</h3>
+                                    <p style="color: #ccc;
+                                             font-size: 0.9rem;
+                                             line-height: 1.4;
+                                             margin-bottom: 15px;
+                                             flex-grow: 1;
+                                             overflow: hidden;
+                                             display: -webkit-box;
+                                             -webkit-line-clamp: 3;
+                                             -webkit-box-orient: vertical;">${truncatedDesc}</p>
+                                    <span class="badge bg-primary" 
+                                          style="padding: 5px 10px;
+                                                 font-size: 0.8rem;
+                                                 align-self: flex-start;">${character.tag}</span>
+                                </div>`;
+                        }).join('');
+
                         const endTime = performance.now();
                         document.getElementById('time').textContent = `Characters loaded in ${(endTime - startTime).toFixed(2)} ms`;
+                        
+                        const cards = document.querySelectorAll('.character-card');
+                        cards.forEach(card => {
+                            card.addEventListener('mouseover', () => {
+                                card.style.transform = 'translateY(-5px)';
+                                card.style.boxShadow = '0 6px 12px rgba(0,0,0,0.3)';
+                            });
+                            card.addEventListener('mouseout', () => {
+                                card.style.transform = 'translateY(0)';
+                                card.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                            });
+                        });
                     })
-                    .catch(error => console.error('Error loading characters:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('time').textContent = 'Error loading characters: ' + error.message;
+                    });
+            }
+            function showExpandedCard(character) {
+                const expandedDesc = character.description.length > 500 ? 
+                    character.description.substring(0, 500) + '...' : 
+                    character.description;
+
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(to bottom, rgba(0,0,0,0.98), rgba(0,0,0,0.95));
+                    padding: 35px;
+                    border-radius: 25px;
+                    z-index: 1000;
+                    width: 85%;
+                    max-width: 700px;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                    box-shadow: 0 0 40px rgba(0,0,0,0.8), 0 0 100px rgba(0,123,255,0.2);
+                    animation: modalFadeIn 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+                    scrollbar-width: thin;
+                    scrollbar-color: rgba(255,255,255,0.4) rgba(0,0,0,0.2);
+                `;
+
+                modal.innerHTML = `
+                    <style>
+                        .modal-content {
+                            opacity: 0;
+                            transform: translateY(30px);
+                            animation: contentSlideUp 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+                            animation-delay: 0.15s;
+                        }
+                        
+                        .modal-btn {
+                            background: linear-gradient(135deg, #007bff, #0056b3);
+                            color: white;
+                            border: none;
+                            padding: 15px 35px;
+                            border-radius: 12px;
+                            cursor: pointer;
+                            font-size: 1.1rem;
+                            font-weight: 600;
+                            letter-spacing: 0.5px;
+                            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+                            transform: scale(1);
+                            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+                        }
+                        
+                        .modal-btn:hover {
+                            background: linear-gradient(135deg, #0056b3, #004494);
+                            transform: scale(1.05) translateY(-2px);
+                            box-shadow: 0 5px 20px rgba(0,123,255,0.4);
+                        }
+                        
+                        .modal-btn:active {
+                            transform: scale(0.98);
+                        }
+                        
+                        .close-btn {
+                            position: absolute;
+                            top: 15px;
+                            right: 15px;
+                            background: rgba(255,255,255,0.15);
+                            border: none;
+                            color: white;
+                            width: 40px;
+                            height: 40px;
+                            border-radius: 50%;
+                            cursor: pointer;
+                            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+                            font-size: 24px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            backdrop-filter: blur(5px);
+                        }
+                        
+                        .close-btn:hover {
+                            background: rgba(255,255,255,0.25);
+                            transform: rotate(90deg);
+                            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+                        }
+                        
+                        @keyframes modalFadeIn {
+                            from {
+                                opacity: 0;
+                                transform: translate(-50%, -45%) scale(0.95);
+                            }
+                            to {
+                                opacity: 1;
+                                transform: translate(-50%, -50%) scale(1);
+                            }
+                        }
+                        
+                        @keyframes contentSlideUp {
+                            from {
+                                opacity: 0;
+                                transform: translateY(30px);
+                            }
+                            to {
+                                opacity: 1;
+                                transform: translateY(0);
+                            }
+                        }
+                    </style>
+                    <div class="modal-content">
+                        <img src="${character.photo}" 
+                             alt="${character.name}"
+                             style="width: 100%;
+                                    height: 350px;
+                                    object-fit: cover;
+                                    border-radius: 18px;
+                                    margin-bottom: 25px;
+                                    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+                                    border: 2px solid rgba(255,255,255,0.1);">
+                        <h2 style="color: #fff;
+                                  font-size: 2.2rem;
+                                  margin-bottom: 20px;
+                                  font-weight: 700;
+                                  text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${character.name}</h2>
+                        <p style="color: #e0e0e0;
+                                 font-size: 1.15rem;
+                                 line-height: 1.8;
+                                 margin-bottom: 30px;
+                                 letter-spacing: 0.4px;
+                                 text-shadow: 0 1px 2px rgba(0,0,0,0.2);">${expandedDesc}</p>
+                        <button onclick="window.location.href='chatting.html?id=${character.id}'" class="modal-btn">
+                            Start Chat
+                        </button>
+                        <button onclick="this.parentElement.parentElement.remove()" class="close-btn">×</button>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                fetch('https://server-hhcx.onrender.com/api/id', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        characterId: character.id
+                    })
+                });
             }
         </script>
         <ul class="dropdown-menu animate__animated animate__fadeIn" aria-labelledby="tagsDropdown" style="background-color: black; z-index: 999; pointer-events: auto;" id="tagsList">
