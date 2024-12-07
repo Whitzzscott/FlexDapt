@@ -155,167 +155,6 @@
 </head>
 
 <body>
-    <div class="sidebar">
-        <h3><i class="fas fa-robot"></i> <span id="sidebarCharacterName">Loading...</span></h3>
-        <div class="btn-group">
-            <button class="btn" onclick="window.location.href='chats.html'"><i class="fas fa-comments"></i> Chats</button>
-            <button class="btn" onclick="clearChat()"><i class="fas fa-plus"></i> New Chat</button>
-            <button class="btn" onclick="toggleSettings()"><i class="fas fa-cog"></i> Settings</button>
-            <button class="btn" onclick="window.location.href='guideline.html'"><i class="fas fa-question-circle"></i> Help</button>
-        </div>
-        <div id="settingsMenu" class="settings-menu">
-            <div class="settings-content">
-                <div class="settings-header">
-                    <h4>Settings</h4>
-                    <button onclick="toggleSettings()" class="close-btn"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="settings-options">
-                    <div class="setting-item">
-                        <label>Theme</label>
-                        <select>
-                            <option>Dark</option>
-                            <option>Light</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <label>Font Size</label>
-                        <select>
-                            <option>Small</option>
-                            <option>Medium</option>
-                            <option>Large</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <style>
-        .settings-menu {
-            position: fixed;
-            top: 0;
-            right: -300px;
-            width: 300px;
-            height: 100%;
-            background-color: #2a2a2a;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.5);
-            transition: right 0.3s ease-in-out;
-            z-index: 1000;
-        }
-        .settings-menu.active {
-            right: 0;
-        }
-        .settings-content {
-            padding: 20px;
-        }
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .settings-header h4 {
-            color: #4a90e2;
-            margin: 0;
-        }
-        .close-btn {
-            background: none;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-        .settings-options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #fff;
-        }
-        .setting-item select {
-            background: #3a3a3a;
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-        }
-    </style>
-    <script>
-        fetch('https://server-hhcx.onrender.com/api/id/get')
-            .then(response => response.json())
-            .then(data => fetch('https://server-hhcx.onrender.com/characterdata/id?id=' + data.characterId))
-            .then(response => response.json())
-            .then(characterResponse => {
-                const decodedData = JSON.parse(atob(characterResponse.data));
-                document.getElementById('sidebarCharacterName').textContent = decodedData.name;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('sidebarCharacterName').textContent = 'Creative Helper';
-            });
-
-        function clearChat() {
-            const chatBox = document.getElementById('chatBox');
-            chatBox.innerHTML = '';
-            window.location.href = 'chats.html';
-        }
-
-        function toggleSettings() {
-            const settingsMenu = document.getElementById('settingsMenu');
-            settingsMenu.classList.toggle('active');
-        }
-    </script>
-<style>
-        .sidebar {
-            width: 250px;
-            background-color: #232323;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
-        }
-
-        .sidebar h3 {
-            color: #4a90e2;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .sidebar .btn {
-            color: #fff;
-            background-color: #4a90e2;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .sidebar .btn i {
-            font-size: 14px;
-        }
-
-        .sidebar .btn:hover {
-            background-color: #357ab7;
-            transform: translateY(-1px);
-        }
-</style>
     <div class="chat-container">
         <style>
             @keyframes spin {
@@ -327,11 +166,20 @@
             <div class="spinner" style="width: 60px; height: 60px; border: 6px solid rgba(255, 255, 255, 0.3); border-top: 6px solid #4a90e2; border-radius: 50%; animation: spin 1s linear infinite; animation: spin 1s linear infinite, move 2s ease-in-out infinite alternate;"></div>
         </div>
 
-        <div class="header" style="display: flex; align-items: center; padding: 15px; cursor: pointer;" onclick="document.getElementById('characterOverlay').style.display='block'">
-            <img src="" alt="Bot Avatar" id="characterAvatar" style="border-radius: 50%; width: 60px; height: 60px; margin-right: 15px;">
-            <div>
-                <h3 id="characterName" style="margin: 0; color: #4a90e2; font-size: 1.5rem;">NULL</h3>
-                <p id="characterDescription" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 20ch; color: #e0e0e0; margin-top: 5px;">NULL</p>
+        <div class="header" style="display: flex; align-items: center; justify-content: space-between; padding: 15px;">
+            <div style="display: flex; align-items: center;">
+                <button onclick="window.location.href='index.html'" style="background: none; border: none; color: white; font-size: 24px; padding: 0 15px 0 0; cursor: pointer; transition: background 0.3s; border-radius: 50%;"><i class="fas fa-arrow-left"></i></button>
+                <div style="display: flex; align-items: center; cursor: pointer;" onclick="document.getElementById('characterOverlay').style.display='block'">
+                    <img src="" alt="Bot Avatar" id="characterAvatar" style="border-radius: 50%; width: 60px; height: 60px; margin-right: 15px;">
+                    <div>
+                        <h3 id="characterName" style="margin: 0; color: #4a90e2; font-size: 1.5rem;">NULL</h3>
+                        <p id="characterDescription" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 30ch; color: #e0e0e0; margin-top: 5px;">NULL</p>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="window.location.href='settings.html'" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; transition: background 0.3s, transform 0.3s; border-radius: 50%;"><i class="fas fa-cog"></i></button>
+                <button onclick="window.location.href='guideline.html'" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; transition: background 0.3s, transform 0.3s; border-radius: 50%;"><i class="fas fa-question-circle"></i></button>
             </div>
         </div>
 
@@ -435,6 +283,11 @@
                 let messageElement = document.createElement('div');
                 messageElement.classList.add('message', 'user');
 
+                let messageContent = document.createElement('div');
+                messageContent.classList.add('message-content');
+                messageContent.innerText = messageText;
+                messageElement.appendChild(messageContent);
+
                 try {
                     const response = await fetch('https://server-hhcx.onrender.com/persona');
                     if (!response.ok) {
@@ -447,28 +300,19 @@
 
                     let userInfo = document.createElement('div');
                     userInfo.classList.add('user-info');
-                    userInfo.style.textAlign = 'center';
+                    userInfo.style.display = 'flex';
+                    userInfo.style.alignItems = 'center';
+                    userInfo.style.justifyContent = 'flex-start';
+                    userInfo.style.marginBottom = '28px';
+                    userInfo.style.marginLeft = '0';
                     userInfo.innerHTML = `
-                        <img src="${userPhoto}" alt="${userName}" style="
-                        width: 40px; 
-                        height: 40px; 
-                        border-radius: 50%; 
-                        display: block; 
-                        position: absolute; 
-                        top: 180px;">
-                        <div style="font-weight: bold; 
-                        color: #fff; 
-                        position: absolute; 
-                        top: 170px;
-                        left: 160px;
+                        <div style="
+                            font-weight: 500;
+                            color: #fff;
+                            font-size: 14px;
                         ">${userName}</div>
                     `;
-                    messageElement.appendChild(userInfo);
-
-                    let messageContent = document.createElement('div');
-                    messageContent.classList.add('message-content');
-                    messageContent.innerText = messageText;
-                    messageElement.appendChild(messageContent);
+                    messageElement.insertBefore(userInfo, messageContent);
 
                     let timeStamp = document.createElement('div');
                     timeStamp.classList.add('message-time');
@@ -478,7 +322,6 @@
 
                     messageElement.addEventListener('contextmenu', function(e) {
                         e.preventDefault();
-                        // Remove any existing context menus
                         const existingMenus = document.querySelectorAll('.context-menu');
                         existingMenus.forEach(menu => menu.remove());
 
@@ -640,24 +483,63 @@
                 chatBox.scrollTop = chatBox.scrollHeight;
 
                 try {
+                    if (!characterData || !characterData.name || !characterData.description || 
+                        !characterData.modelInstructions || !characterData.system || 
+                        !characterData.persona || !characterData.firstMessage) {
+                        throw new Error('Character data is missing required fields');
+                    }
+
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+
+                    const checkerResponse = await fetch('/api/v1/server/checker/post', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify({
+                            name: characterData.name,
+                            description: characterData.description,
+                            modelInstructions: characterData.modelInstructions,
+                            system: characterData.system,
+                            persona: characterData.persona,
+                            firstMessage: characterData.firstMessage
+                        })
+                    });
+
+                    if (!checkerResponse.ok) {
+                        throw new Error('Checker post request failed');
+                    }
+
+                    const getCheckerResponse = await fetch('/api/v1/server/checker/get', {
+                        method: 'GET',
+                        headers: headers,
+                        credentials: 'include'
+                    });
+
+                    if (!getCheckerResponse.ok) {
+                        throw new Error('Failed to get checker data');
+                    }
+
+                    const getCheckerData = await getCheckerResponse.json();
+                    const decodedData = atob(getCheckerData.data);
+                    const parsedData = JSON.parse(decodedData);
+
                     const response = await fetch('https://server-hhcx.onrender.com/generatetext', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: headers,
                         body: JSON.stringify({
                             prompt: messageText,
-                            character: {
-                                name: characterData.name,
-                                description: characterData.description,
-                                modelInstructions: characterData.modelInstructions,
-                                system: characterData.system,
-                                persona: characterData.persona,
-                                firstMessage: characterData.firstMessage
-                            },
                             max_tokens: settings.max_tokens || 100,
                             top_k: settings.top_k || 50,
-                            temperature: settings.temperature || 0.7
+                            temperature: settings.temperature || 0.7,
+                            character: {
+                                name: parsedData.name,
+                                description: parsedData.description, 
+                                modelInstructions: parsedData.modelInstructions,
+                                system: parsedData.system,
+                                persona: parsedData.persona,
+                                firstMessage: parsedData.firstMessage
+                            }
                         })
                     });
 
@@ -666,6 +548,12 @@
                     }
 
                     const data = await response.json();
+                    const botResponse = data.model_response?.result?.response;
+                    
+                    if (!botResponse) {
+                        throw new Error('Invalid response format from server');
+                    }
+
                     typingIndicator.remove();
 
                     let botMessageElement = document.createElement('div');
@@ -922,10 +810,14 @@
                         clearTimeout(longPressTimer);
                     });
 
-                    for (let i = 0; i < data.result.response.length; i++) {
-                        botMessageContent.innerText = data.result.response.substring(0, i + 1);
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                        await new Promise(resolve => setTimeout(resolve, 20));
+                    if (data?.model_response?.result?.response) {
+                        for (let i = 0; i < data.model_response.result.response.length; i++) {
+                            botMessageContent.innerText = data.model_response.result.response.substring(0, i + 1);
+                            chatBox.scrollTop = chatBox.scrollHeight;
+                            await new Promise(resolve => setTimeout(resolve, 20));
+                        }
+                    } else {
+                        throw new Error('Invalid response format');
                     }
                 } catch (error) {
                     console.error('Error:', error);
