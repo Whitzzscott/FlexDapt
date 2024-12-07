@@ -203,7 +203,79 @@
             </div>
             <div id="chatHistory"></div>
             <script>
-                
+                function saveChat(message, sender) {
+                    if (!message || !message.trim()) return;
+                    
+                    const chat = {
+                        message: message.trim(),
+                        sender: sender,
+                        timestamp: new Date().toISOString(),
+                        number: "1ms"
+                    };
+
+                    fetch('/chats', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(chat)
+                    });
+
+                    displayChat(chat);
+                }
+
+                function displayChat(chat) {
+                    if (!chat.message || !chat.message.trim()) return;
+                    
+                    const chatHistory = document.getElementById('chatHistory');
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = chat.sender === 'bot' ? 'message bot' : 'message user';
+                    messageDiv.innerHTML = `
+                        <div class="message-content">
+                            ${chat.message}
+                        </div>
+                    `;
+
+                    chatHistory.appendChild(messageDiv);
+                }
+
+                function getAllChats() {
+                    const chatHistory = document.getElementById('chatHistory');
+                    const messages = chatHistory.querySelectorAll('.message');
+                    
+                    messages.forEach(message => {
+                        const content = message.querySelector('.message-content').textContent.trim();
+                        const sender = message.classList.contains('bot') ? 'bot' : 'user';
+                        if (content) {
+                            saveChat(content, sender);
+                        }
+                    });
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    const sendBtn = document.getElementById('sendBtn');
+                    const messageInput = document.getElementById('messageInput');
+
+                    if (sendBtn) {
+                        sendBtn.addEventListener('click', function() {
+                            if (messageInput && messageInput.value.trim()) {
+                                saveChat(messageInput.value, 'user');
+                                messageInput.value = '';
+                                getAllChats();
+                            }
+                        });
+                    }
+
+                    if (messageInput) {
+                        messageInput.addEventListener('keypress', function(e) {
+                            if (e.key === 'Enter' && this.value.trim()) {
+                                saveChat(this.value, 'user');
+                                this.value = '';
+                                getAllChats();
+                            }
+                        });
+                    }
+                });
             </script>
             </script>
         </div>
@@ -241,25 +313,13 @@
         let characterData;
         
         Promise.all([
-            fetch('https://server-hhcx.onrender.com/api/id/get', {
-                mode: 'no-cors',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
+            fetch('https://server-hhcx.onrender.com/api/id/get')
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => 
-                    fetch('https://server-hhcx.onrender.com/characterdata/id?id=' + data.characterId, {
-                        mode: 'no-cors',
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
+                    fetch('https://server-hhcx.onrender.com/characterdata/id?id=' + data.characterId)
                         .then(response => {
                             if (!response.ok) throw new Error('Network response was not ok');
                             return response.json();
@@ -509,7 +569,7 @@
                         'Content-Type': 'application/json'
                     };
 
-                    const checkerResponse = await fetch('/api/v1/server/checker/post', {
+                    const checkerResponse = await fetch('https://server-hhcx.onrender.com/api/v1/server/checker/post', {
                         method: 'POST',
                         headers: headers,
                         body: JSON.stringify({
@@ -526,9 +586,11 @@
                         throw new Error('Checker post request failed');
                     }
 
-                    const getCheckerResponse = await fetch('/api/v1/server/checker/get', {
+                    const getCheckerResponse = await fetch('https://server-hhcx.onrender.com/api/v1/server/checker/get', {
                         method: 'GET',
-                        headers: headers,
+                        headers: {
+                            ...headers,
+                        },
                     });
 
                     if (!getCheckerResponse.ok) {
