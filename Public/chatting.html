@@ -493,7 +493,7 @@
                         'Content-Type': 'application/json'
                     };
 
-                    const checkerResponse = await fetch('https://serger.onrender.com/api/v1/server/checker/post', {
+                    const checkerResponse = await fetch('https://server-hhcx.onrender.com/api/v1/server/checker/post', {
                         method: 'POST',
                         headers: headers,
                         body: JSON.stringify({
@@ -510,7 +510,7 @@
                         throw new Error('Checker post request failed');
                     }
 
-                    const getCheckerResponse = await fetch('https://serger.onrender.com/api/v1/server/checker/get', {
+                    const getCheckerResponse = await fetch('https://server-hhcx.onrender.com/api/v1/server/checker/get', {
                         method: 'GET',
                         headers: headers,
                         credentials: 'include'
