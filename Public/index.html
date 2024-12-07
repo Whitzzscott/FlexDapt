@@ -217,9 +217,22 @@
     </style>
     <h1 style="position: absolute; top: 10px; left: 10px; font-size: 1.5rem; color: #ffffff; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">FlexDapt</h1>
     <div class="search-section d-flex justify-content-center align-items-center mb-4" style="font-size: 1.2rem;">
-        <input type="text" class="search-input form-control me-2" placeholder="Search characters..." aria-label="Search characters" style="padding: 8px; width: 80%;">
-        <button class="search-button btn btn-primary" style="padding: 8px 16px; font-size: 1rem;">Search</button>
+        <input type="text" class="search-input form-control me-2" placeholder="Search characters..." aria-label="Search characters" style="padding: 8px; width: 80%;" oninput="filterCharactersBySearch(this.value)">
+        <button class="search-button btn btn-primary" style="padding: 8px 16px; font-size: 1rem;" onclick="filterCharactersBySearch(document.querySelector('.search-input').value)">Search</button>
     </div>
+    <script>
+        function filterCharactersBySearch(searchTerm) {
+            const cards = document.querySelectorAll('.character-card');
+            searchTerm = searchTerm.toLowerCase();
+            
+            cards.forEach(card => {
+                const name = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                const matches = name.includes(searchTerm) || description.includes(searchTerm);
+                card.style.display = matches ? 'block' : 'none';
+            });
+        }
+    </script>
     <div class="dropdown mb-3" id="tagsDropdownContainer">
         <div class="d-flex align-items-center">
             <button class="btn btn-dark dropdown-toggle" type="button" id="tagsDropdown" aria-expanded="false">
@@ -247,6 +260,7 @@
                     });
                 }
             }
+
             function fetchCharacters() {
                 const startTime = performance.now();
                 fetch('https://server-hhcx.onrender.com/characters')
@@ -262,9 +276,9 @@
                         charactersContainer.style.cssText = `
                             display: grid;
                             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                            gap: 20px;
-                            padding: 20px;
-                            max-width: 1200px;
+                            gap: 25px;
+                            padding: 25px;
+                            max-width: 1400px;
                             margin: 0 auto;
                         `;
 
@@ -274,67 +288,128 @@
                                 character.description;
 
                             return `
-                                <div class="character-card animate__animated animate__fadeIn" 
+                                <div class="character-card animate__animated animate__fadeInUp" 
                                      onclick="showExpandedCard(${JSON.stringify(character).replace(/"/g, '&quot;')})"
-                                     style="background: rgba(0,0,0,0.8); 
-                                            border-radius: 15px;
-                                            padding: 20px;
+                                     style="background: rgba(0,0,0,0.85); 
+                                            border-radius: 20px;
+                                            padding: 25px;
                                             width: 100%;
                                             height: 100%;
-                                            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                                            transition: transform 0.3s ease, box-shadow 0.3s ease;
+                                            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+                                            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
                                             cursor: pointer;
                                             display: flex;
-                                            flex-direction: column;">
+                                            flex-direction: column;
+                                            backdrop-filter: blur(10px);
+                                            position: relative;
+                                            overflow: hidden;
+                                            transform: scale(1);">
+                                    <div class="lighting-effect" style="position: absolute;
+                                                                      width: 100%;
+                                                                      height: 100%;
+                                                                      top: 0;
+                                                                      left: 0;
+                                                                      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15), transparent 50%);
+                                                                      opacity: 0;
+                                                                      transition: opacity 0.3s ease;
+                                                                      pointer-events: none;">
+                                    </div>
                                     <div style="position: relative;
                                                 width: 100%;
                                                 padding-top: 66.67%;
-                                                margin-bottom: 15px;">
-                                        <img src="${character.photo}" 
-                                             alt="${character.name}"
-                                             style="position: absolute;
-                                                    top: 0;
-                                                    left: 0;
-                                                    width: 100%;
-                                                    height: 100%;
-                                                    object-fit: cover;
-                                                    border-radius: 10px;">
+                                                margin-bottom: 20px;
+                                                border-radius: 15px;
+                                                overflow: hidden;">
+                                        <div class="image-container" style="position: absolute;
+                                                                          top: 0;
+                                                                          left: 0;
+                                                                          width: 100%;
+                                                                          height: 100%;
+                                                                          border: 3px solid transparent;
+                                                                          border-radius: 15px;
+                                                                          transition: all 0.4s ease;
+                                                                          overflow: hidden;">
+                                            <img src="${character.photo}" 
+                                                 alt="${character.name}"
+                                                 style="width: 100%;
+                                                        height: 100%;
+                                                        object-fit: cover;
+                                                        transition: transform 0.5s ease;">
+                                            <div class="chat-count" style="position: absolute;
+                                                                         top: 15px;
+                                                                         right: 15px;
+                                                                         background: rgba(0,0,0,0.8);
+                                                                         padding: 8px 15px;
+                                                                         border-radius: 20px;
+                                                                         color: white;
+                                                                         font-size: 1rem;
+                                                                         display: flex;
+                                                                         align-items: center;
+                                                                         gap: 8px;
+                                                                         backdrop-filter: blur(5px);
+                                                                         box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                                                <i class="fas fa-comment"></i>
+                                                <span class="count">0</span>
+                                            </div>
+                                        </div>
                                     </div>
                                     <h3 style="color: #fff;
-                                             font-size: 1.5rem;
-                                             margin-bottom: 10px;
+                                             font-size: 1.6rem;
+                                             margin-bottom: 12px;
                                              font-weight: bold;
                                              overflow: hidden;
                                              text-overflow: ellipsis;
-                                             white-space: nowrap;">${character.name}</h3>
-                                    <p style="color: #ccc;
-                                             font-size: 0.9rem;
-                                             line-height: 1.4;
-                                             margin-bottom: 15px;
+                                             white-space: nowrap;
+                                             text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${character.name}</h3>
+                                    <p style="color: #e0e0e0;
+                                             font-size: 1rem;
+                                             line-height: 1.6;
+                                             margin-bottom: 20px;
                                              flex-grow: 1;
                                              overflow: hidden;
                                              display: -webkit-box;
                                              -webkit-line-clamp: 3;
                                              -webkit-box-orient: vertical;">${truncatedDesc}</p>
                                     <span class="badge bg-primary" 
-                                          style="padding: 5px 10px;
-                                                 font-size: 0.8rem;
-                                                 align-self: flex-start;">${character.tag}</span>
+                                          style="padding: 8px 15px;
+                                                 font-size: 0.9rem;
+                                                 align-self: flex-start;
+                                                 border-radius: 12px;
+                                                 background: linear-gradient(135deg, #4a90e2, #357abd);
+                                                 box-shadow: 0 4px 12px rgba(74,144,226,0.3);">${character.tag}</span>
                                 </div>`;
                         }).join('');
 
                         const endTime = performance.now();
-                        document.getElementById('time').textContent = `Characters loaded in ${(endTime - startTime).toFixed(2)} ms`;
                         
                         const cards = document.querySelectorAll('.character-card');
                         cards.forEach(card => {
-                            card.addEventListener('mouseover', () => {
-                                card.style.transform = 'translateY(-5px)';
-                                card.style.boxShadow = '0 6px 12px rgba(0,0,0,0.3)';
+                            const imageContainer = card.querySelector('.image-container');
+                            const img = imageContainer.querySelector('img');
+                            const lightingEffect = card.querySelector('.lighting-effect');
+                            
+                            card.addEventListener('mousemove', (e) => {
+                                const rect = card.getBoundingClientRect();
+                                const x = e.clientX - rect.left;
+                                const y = e.clientY - rect.top;
+                                
+                                lightingEffect.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.15), transparent 50%)`;
+                                lightingEffect.style.opacity = '1';
+                                
+                                imageContainer.style.borderColor = '#4a90e2';
+                                imageContainer.style.boxShadow = '0 0 30px rgba(74,144,226,0.6)';
+                                img.style.transform = 'scale(1.1)';
+                                card.style.transform = 'scale(1.05)';
+                                card.style.boxShadow = '0 12px 40px rgba(0,0,0,0.4)';
                             });
-                            card.addEventListener('mouseout', () => {
-                                card.style.transform = 'translateY(0)';
-                                card.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                            
+                            card.addEventListener('mouseleave', () => {
+                                lightingEffect.style.opacity = '0';
+                                imageContainer.style.borderColor = 'transparent';
+                                imageContainer.style.boxShadow = 'none';
+                                img.style.transform = 'scale(1)';
+                                card.style.transform = 'scale(1)';
+                                card.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)';
                             });
                         });
                     })
@@ -343,10 +418,13 @@
                         document.getElementById('time').textContent = 'Error loading characters: ' + error.message;
                     });
             }
+            
             function showExpandedCard(character) {
                 const expandedDesc = character.description.length > 500 ? 
                     character.description.substring(0, 500) + '...' : 
                     character.description;
+
+                document.body.style.overflow = 'hidden';
 
                 const modal = document.createElement('div');
                 modal.style.cssText = `
@@ -354,79 +432,24 @@
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    background: linear-gradient(to bottom, rgba(0,0,0,0.98), rgba(0,0,0,0.95));
-                    padding: 35px;
-                    border-radius: 25px;
+                    background: linear-gradient(135deg, rgba(0,0,0,0.98), rgba(20,20,20,0.95));
+                    padding: 25px;
+                    border-radius: 20px;
                     z-index: 1000;
-                    width: 85%;
-                    max-width: 700px;
-                    max-height: 90vh;
+                    width: 70%;
+                    max-width: 600px;
+                    max-height: 80vh;
                     overflow-y: auto;
-                    box-shadow: 0 0 40px rgba(0,0,0,0.8), 0 0 100px rgba(0,123,255,0.2);
-                    animation: modalFadeIn 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+                    box-shadow: 0 0 30px rgba(0,0,0,0.7);
+                    animation: modalFadeIn 0.3s ease;
                     scrollbar-width: thin;
-                    scrollbar-color: rgba(255,255,255,0.4) rgba(0,0,0,0.2);
+                    scrollbar-color: rgba(255,255,255,0.5) rgba(0,0,0,0.3);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255,255,255,0.1);
                 `;
 
                 modal.innerHTML = `
                     <style>
-                        .modal-content {
-                            opacity: 0;
-                            transform: translateY(30px);
-                            animation: contentSlideUp 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-                            animation-delay: 0.15s;
-                        }
-                        
-                        .modal-btn {
-                            background: linear-gradient(135deg, #007bff, #0056b3);
-                            color: white;
-                            border: none;
-                            padding: 15px 35px;
-                            border-radius: 12px;
-                            cursor: pointer;
-                            font-size: 1.1rem;
-                            font-weight: 600;
-                            letter-spacing: 0.5px;
-                            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-                            transform: scale(1);
-                            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-                        }
-                        
-                        .modal-btn:hover {
-                            background: linear-gradient(135deg, #0056b3, #004494);
-                            transform: scale(1.05) translateY(-2px);
-                            box-shadow: 0 5px 20px rgba(0,123,255,0.4);
-                        }
-                        
-                        .modal-btn:active {
-                            transform: scale(0.98);
-                        }
-                        
-                        .close-btn {
-                            position: absolute;
-                            top: 15px;
-                            right: 15px;
-                            background: rgba(255,255,255,0.15);
-                            border: none;
-                            color: white;
-                            width: 40px;
-                            height: 40px;
-                            border-radius: 50%;
-                            cursor: pointer;
-                            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-                            font-size: 24px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            backdrop-filter: blur(5px);
-                        }
-                        
-                        .close-btn:hover {
-                            background: rgba(255,255,255,0.25);
-                            transform: rotate(90deg);
-                            box-shadow: 0 0 15px rgba(255,255,255,0.2);
-                        }
-                        
                         @keyframes modalFadeIn {
                             from {
                                 opacity: 0;
@@ -437,46 +460,79 @@
                                 transform: translate(-50%, -50%) scale(1);
                             }
                         }
+
+                        .character-image {
+                            transition: transform 0.3s ease;
+                        }
+
+                        .character-image:hover {
+                            transform: scale(1.02);
+                        }
+
+                        .modal-btn {
+                            background: linear-gradient(135deg, #007bff, #0056b3);
+                            color: white;
+                            border: none;
+                            padding: 12px 25px;
+                            border-radius: 12px;
+                            cursor: pointer;
+                            font-size: 1.1rem;
+                            font-weight: 600;
+                            transition: all 0.3s ease;
+                        }
                         
-                        @keyframes contentSlideUp {
-                            from {
-                                opacity: 0;
-                                transform: translateY(30px);
-                            }
-                            to {
-                                opacity: 1;
-                                transform: translateY(0);
-                            }
+                        .modal-btn:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 5px 15px rgba(0,123,255,0.4);
                         }
                     </style>
                     <div class="modal-content">
                         <img src="${character.photo}" 
                              alt="${character.name}"
+                             class="character-image"
                              style="width: 100%;
-                                    height: 350px;
+                                    height: 300px;
                                     object-fit: cover;
-                                    border-radius: 18px;
-                                    margin-bottom: 25px;
-                                    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-                                    border: 2px solid rgba(255,255,255,0.1);">
+                                    border-radius: 15px;
+                                    margin-bottom: 20px;
+                                    box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
                         <h2 style="color: #fff;
-                                  font-size: 2.2rem;
-                                  margin-bottom: 20px;
-                                  font-weight: 700;
-                                  text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${character.name}</h2>
-                        <p style="color: #e0e0e0;
-                                 font-size: 1.15rem;
-                                 line-height: 1.8;
-                                 margin-bottom: 30px;
-                                 letter-spacing: 0.4px;
-                                 text-shadow: 0 1px 2px rgba(0,0,0,0.2);">${expandedDesc}</p>
+                                  font-size: 2rem;
+                                  margin-bottom: 15px;
+                                  font-weight: 600;">${character.name}</h2>
+                        <p style="color: #f0f0f0;
+                                 font-size: 1.1rem;
+                                 line-height: 1.6;
+                                 margin-bottom: 20px;
+                                 padding: 15px;
+                                 background: rgba(255,255,255,0.05);
+                                 border-radius: 12px;">${expandedDesc}</p>
                         <button onclick="window.location.href='chatting.html?id=${character.id}'" class="modal-btn">
-                            Start Chat
+                            Start Conversation
                         </button>
-                        <button onclick="this.parentElement.parentElement.remove()" class="close-btn">×</button>
                     </div>
                 `;
 
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 999;
+                `;
+
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        overlay.remove();
+                        modal.remove();
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+
+                document.body.appendChild(overlay);
                 document.body.appendChild(modal);
 
                 fetch('https://server-hhcx.onrender.com/api/id', {
@@ -524,12 +580,14 @@
                 }
                 updateSelectedTagsDisplay();
                 filterCharacters();
+                updateTagsVisibility();
             }
 
             function removeTag(tag) {
                 selectedTags.delete(tag);
                 updateSelectedTagsDisplay();
                 filterCharacters();
+                updateTagsVisibility();
             }
 
             function updateSelectedTagsDisplay() {
@@ -537,32 +595,43 @@
                 container.innerHTML = '';
                 selectedTags.forEach(tag => {
                     const tagElement = document.createElement('span');
-                    tagElement.className = 'badge bg-primary me-1 mb-1';
+                    tagElement.className = 'badge bg-primary me-1 mb-1 animate__animated animate__fadeIn';
                     tagElement.style.padding = '5px 10px';
                     tagElement.style.borderRadius = '15px';
+                    tagElement.style.transition = 'all 0.3s ease';
                     tagElement.innerHTML = `${tag} <span style="cursor: pointer; margin-left: 5px" onclick="removeTag('${tag}')">&times;</span>`;
                     container.appendChild(tagElement);
                 });
             }
 
+            function updateTagsVisibility() {
+                const tagsList = document.getElementById('tagsList');
+                const tagItems = tagsList.querySelectorAll('.dropdown-item');
+                tagItems.forEach(item => {
+                    const tagText = item.textContent;
+                    if (selectedTags.has(tagText)) {
+                        item.style.display = 'none';
+                    } else {
+                        item.style.display = 'block';
+                    }
+                });
+            }
+
             function filterCharacters() {
-                fetch('https://server-hhcx.onrender.com/characterdata')
-                    .then(response => response.text())
-                    .then(data => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(data, 'text/html');
-                        const characters = Array.from(doc.querySelectorAll('#characters .character'));
-                        const filteredCharacters = selectedTags.size === 0 ? 
-                            characters : 
-                            characters.filter(character => 
-                                Array.from(selectedTags).every(tag => 
-                                    character.dataset.tags.includes(tag)
-                                )
-                            );
-                        const charactersContainer = document.getElementById('characters');
-                        charactersContainer.innerHTML = '';
-                        filteredCharacters.forEach(character => charactersContainer.appendChild(character));
+                const cards = document.querySelectorAll('.character-card');
+                
+                if (selectedTags.size === 0) {
+                    cards.forEach(card => {
+                        card.style.display = 'block';
                     });
+                    return;
+                }
+
+                cards.forEach(card => {
+                    const tag = card.querySelector('.badge').textContent;
+                    const shouldShow = selectedTags.has(tag);
+                    card.style.display = shouldShow ? 'block' : 'none';
+                });
             }
         </script>
     </div>
@@ -587,140 +656,469 @@
         </div>
     </div>
 
-    <div class="footer-icons" style="background-color: rgba(255, 255, 255, 0.5); padding: 15px; border-radius: 8px; position: fixed; left: 0; bottom: 0; width: 100%; display: flex; justify-content: center; flex-wrap: wrap;">
-        <button id="userPersonaBtnFooter" class="btn btn-light" style="margin: 5px;">
-            <i class="bi bi-person"></i> User Persona
+    <div class="sidebar" id="sidebar">
+        <button class="btn btn-light sidebar-btn" onclick="togglePersonaMenu()" data-tooltip="Persona">
+            <i class="bi bi-person-circle"></i>
         </button>
-        <button id="settingsBtnFooter" class="btn btn-light" style="margin: 5px;" onclick="openSettings()">
-            <i class="bi bi-gear"></i> Settings
-        </button>
-        <div id="settingsOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); z-index: 1000; justify-content: center; align-items: center;">
-            <div style="background-color: black; padding: 20px; border-radius: 10px; width: 300px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);">
-                <h2 style="color: white; text-align: center; margin-bottom: 15px;">Settings</h2>
-                <div id="loggedOutButtons" style="display: none;">
-                    <button id="registerBtn" class="btn btn-secondary" style="width: 100%;" onclick="window.location.href='./register/register.html'">Register</button>
-                    <button id="loginBtn" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" onclick="window.location.href='./login/login.html'">Log In</button>
-                </div>
-                <div id="loggedInButtons" style="display: none;">
-                    <button id="registerBtn" class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;" onclick="window.location.href='./register/register.html'">Register</button>
-                    <button id="loginBtn" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" onclick="window.location.href='./login/login.html'">Log In</button>
-                    <button id="logoutBtn" class="btn btn-danger" style="width: 100%;" onclick="confirmLogout()">Log Out</button>
-                </div>
-                <button id="closeSettingsBtn" class="btn btn-light" style="width: 100%; margin-top: 10px;">❌ Close</button>
-                <script>
-                    const userId = localStorage.getItem('userId');
-                    document.getElementById('loggedInButtons').style.display = userId ? 'block' : 'none';
-                    document.getElementById('loggedOutButtons').style.display = userId ? 'none' : 'block';
-                </script>
+        <div id="personaMenu" style="display: none; position: absolute; left: 70px; top: 0; background: #000; color: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); width: 300px; transform: translateX(-20px) scale(0.95); opacity: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);">
+            <h4 style="margin-bottom: 20px; font-weight: 600; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease 0.2s;">Persona</h4>
+            <input type="text" placeholder="Name" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #333; border-radius: 8px; background: #111; color: #fff; transition: all 0.3s ease; opacity: 0; transform: translateY(-10px); transition-delay: 0.3s;">
+            <textarea placeholder="Description" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #333; border-radius: 8px; min-height: 120px; background: #111; color: #fff; transition: all 0.3s ease; opacity: 0; transform: translateY(-10px); transition-delay: 0.4s;"></textarea>
+            <div class="image-upload-container" style="width: 100%; margin-bottom: 15px; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease 0.5s;">
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                <button onclick="document.getElementById('imageInput').click()" class="btn btn-outline-primary" style="width: 100%; padding: 12px; border-radius: 8px; background: #111; color: #fff; border: 1px dashed #4a90e2; transition: all 0.2s ease;">
+                    <i class="bi bi-cloud-upload"></i> Choose Image
+                </button>
+                <div id="imagePreview" style="margin-top: 10px; width: 100%; height: 150px; border-radius: 8px; background-size: cover; background-position: center; display: none;"></div>
             </div>
-            <script>
-                function confirmLogout() {
-                    window.location.href = './Goodbye.html';
-                }
-            </script>
+            <button onclick="submitPersona()" class="btn btn-primary" style="width: 100%; padding: 12px; border-radius: 8px; background: #4a90e2; color: #fff; border: none; transition: all 0.2s ease; opacity: 0; transform: translateY(-10px); transition-delay: 0.6s;">
+                Submit
+            </button>
         </div>
-        <script>
-            function openSettings() {
-                document.getElementById('settingsOverlay').style.display = 'flex';
-            }
-            document.getElementById('closeSettingsBtn').addEventListener('click', function() {
-                document.getElementById('settingsOverlay').style.display = 'none';
-            });
-        </script>
-    </div>
-    <div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); z-index: 1000; justify-content: center; align-items: center; animation: fadeIn 0.5s;">
-        <div style="background-color: black; padding: 20px; border-radius: 10px; width: 300px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);">
-            <h2 style="color: white; text-align: center; margin-bottom: 15px;">Create Persona</h2>
-            <input type="text" id="personaName" placeholder="Name" style="width: 100%; margin-bottom: 10px; padding: 10px; border: none; border-radius: 5px; background-color: #333; color: white;"/>
-            <input type="text" id="personaDescription" placeholder="Description" style="width: 100%; margin-bottom: 10px; padding: 10px; border: none; border-radius: 5px; background-color: #333; color: white;"/>
-            <input type="text" id="personaPhoto" placeholder="Profile Picture URL" style="width: 100%; margin-bottom: 10px; padding: 10px; border: none; border-radius: 5px; background-color: #333; color: white;"/>
-            <button id="savePersonaBtn" class="btn btn-primary" style="width: 100%; background-color: #007bff; border: none; border-radius: 5px; padding: 10px; color: white; font-weight: bold;">💾 Save</button>
-            <button id="closeOverlayBtn" class="btn btn-secondary" style="width: 100%; margin-top: 10px; background-color: #6c757d; border: none; border-radius: 5px; padding: 10px; color: white; font-weight: bold;">❌ Close</button>
-        </div>
+        <button class="btn btn-light sidebar-btn settings-btn" data-tooltip="Settings">
+            <i class="bi bi-gear"></i>
+        </button>
+        <button class="btn btn-light sidebar-btn" onclick="window.location.href='guideline.html'" data-tooltip="Help/Guidelines">
+            <i class="bi bi-question-circle"></i>
+        </button>
+        
+        <button class="btn btn-primary sidebar-btn" onclick="window.location.href='chats.html'" data-tooltip="Chats">
+            <i class="bi bi-chat"></i>
+        </button>
+        
+        <button class="btn btn-light sidebar-btn" id="createBtnFooter" onclick="window.location.href='create.html'" data-tooltip="Create">
+            <i class="bi bi-plus-circle"></i>
+        </button>
     </div>
     <style>
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .sidebar-btn {
+            position: relative;
+        }
+        
+        .sidebar-btn::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .sidebar-btn:hover::after {
+            opacity: 1;
+            visibility: visible;
+            transition-delay: 0.5s;
         }
     </style>
+    <div id="settingsOverlay" class="settings-overlay">
+        <div class="settings-content settings-animate">
+            <button class="close-btn" onclick="toggleSettingsOverlay()" style="color: #fff;">&times;</button>
+            <div id="loggedInButtons" class="settings-buttons">
+                <button class="btn btn-danger settings-btn" onclick="handleLogout()">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Logout
+                </button>
+                <button class="btn btn-primary settings-btn" onclick="toggleHiddenTags()">
+                    <i class="bi bi-tags"></i>
+                    Hidden Tags
+                </button>
+            </div>
+            <div id="loggedOutButtons" class="settings-buttons">
+                <button class="btn btn-primary settings-btn" onclick="window.location.href='login.html'">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Login
+                </button>
+                <button class="btn btn-success settings-btn" onclick="window.location.href='register.html'">
+                    <i class="bi bi-person-plus"></i>
+                    Register
+                </button>
+            </div>
+            <div id="hiddenTagsSection" class="hidden-tags-section">
+                <input type="text" id="newTagInput" placeholder="Add new tag" class="tag-input">
+                <button onclick="addNewTag()" class="btn btn-primary add-tag-btn">Add Tag</button>
+                <div class="tags-container" id="hiddenTagsList"></div>
+            </div>
+        </div>
+    </div>
+    <button id="toggleSidebar" class="btn btn-primary toggle-btn">
+        <i class="bi bi-arrow-left" id="toggleIcon"></i>
+    </button>
     <script>
-        document.getElementById('userPersonaBtnFooter').addEventListener('click', function() {
-            document.getElementById('overlay').style.display = 'flex';
-        });
-        
-        document.getElementById('closeOverlayBtn').addEventListener('click', function() {
-            document.getElementById('overlay').style.display = 'none';
+        function togglePersonaMenu() {
+            const menu = document.getElementById('personaMenu');
+            const elements = menu.querySelectorAll('h4, input, textarea, .image-upload-container, button');
+            
+            if (menu.style.display === 'none') {
+                menu.style.display = 'block';
+                setTimeout(() => {
+                    menu.style.transform = 'translateX(0) scale(1)';
+                    menu.style.opacity = '1';
+                    elements.forEach(el => {
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    });
+                }, 10);
+            } else {
+                elements.forEach(el => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-10px)';
+                });
+                menu.style.transform = 'translateX(-20px) scale(0.95)';
+                menu.style.opacity = '0';
+                setTimeout(() => {
+                    menu.style.display = 'none';
+                }, 400);
+            }
+        }
+
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.style.display = 'block';
+                    preview.style.backgroundImage = `url(${e.target.result})`;
+                }
+                reader.readAsDataURL(file);
+            }
         });
 
-        document.getElementById('userPersonaBtnFooter').addEventListener('click', function() {
-            fetch('https://server-hhcx.onrender.com/persona')
+        function submitPersona() {
+            const imageInput = document.getElementById('imageInput');
+            const nameInput = document.querySelector('input[placeholder="Name"]');
+            const descInput = document.querySelector('textarea[placeholder="Description"]');
+
+            if (!nameInput.value.trim()) {
+                alert('Please enter a name');
+                return;
+            }
+
+            if (!descInput.value.trim()) {
+                alert('Please enter a description');
+                return;
+            }
+
+            if (!imageInput.files[0]) {
+                alert('Please select an image');
+                return;
+            }
+
+            const file = imageInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Image = e.target.result;
+
+                const personaData = {
+                    "Name": nameInput.value.trim(),
+                    "Description": descInput.value.trim(),
+                    "Photo": base64Image
+                };
+
+                localStorage.setItem('savedPersona', JSON.stringify(personaData));
+
+                fetch('https://server-hhcx.onrender.com/persona', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(personaData)
+                })
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('personaName').value = data.Name || '';
-                    document.getElementById('personaDescription').value = data.Description || '';
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    togglePersonaMenu();
                 })
-                .catch(() => {
-                    alert('Error fetching persona data');
+                .catch(error => {
+                    alert('Error: Server error');
+                    console.error('Error:', error);
                 });
-            document.getElementById('overlay').style.display = 'flex';
-        });
-        document.addEventListener('click', function(event) {
-            if (event.target.id === 'savePersonaBtn') {
-                const name = document.getElementById('personaName').value.trim();
-                const description = document.getElementById('personaDescription').value.trim();
-                const photo = document.getElementById('personaPhoto').value.trim();
-                if (name && description && photo) {
-                    fetch('https://server-hhcx.onrender.com/persona', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ "Name": name, "Description": description, "Photo": photo })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.message) {
-                            document.getElementById('overlay').style.display = 'none';
-                            alert('Persona data saved successfully');
-                        } else {
-                            alert(data.error || 'Error saving persona data');
-                        }
-                    })
-                    .catch(() => {
-                        alert('Error saving persona data');
-                    });
-                } else {
-                    alert('Please fill in all fields.');
+            }
+            reader.readAsDataURL(file);
+        }
+
+        window.addEventListener('load', () => {
+            const savedPersona = localStorage.getItem('savedPersona');
+            if (savedPersona) {
+                const data = JSON.parse(savedPersona);
+                const nameInput = document.querySelector('input[placeholder="Name"]');
+                const descInput = document.querySelector('textarea[placeholder="Description"]');
+                const imagePreview = document.getElementById('imagePreview');
+                
+                nameInput.value = data.Name;
+                descInput.value = data.Description;
+                if (data.Photo) {
+                    imagePreview.style.display = 'block';
+                    imagePreview.style.backgroundImage = `url(${data.Photo})`;
                 }
             }
         });
     </script>
-
-    <div class="sidebar" id="sidebar">
-        <button class="btn btn-primary" onclick="window.location.href='chats.html'">
-            <i class="bi bi-chat"></i>
-        </button>
-        <button class="btn btn-light" id="createBtnFooter" onclick="window.location.href='create.html'">
-            <i class="bi bi-plus-circle"></i> 
-        </button>
-    </div>
-    <button id="toggleSidebar" class="btn btn-primary" style="position: fixed; left: 65px; top: 185px; background-color: blue; border: none; color: white;">
-        <i class="bi bi-arrow-left" id="toggleIcon"></i>
-    </button>
     <style>
+        .settings-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);
+            z-index: 1000;
+            backdrop-filter: blur(0px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .settings-overlay.active {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+        }
+
+        .settings-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            padding: 35px;
+            border-radius: 20px;
+            min-width: 320px;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .settings-overlay.active .settings-content {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            border: none;
+            background: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #fff;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg);
+            opacity: 1;
+        }
+
+        .settings-btn {
+            width: 100%;
+            padding: 14px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #4a90e2, #357abd);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
+        }
+
+        .settings-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(74,144,226,0.3);
+        }
+
+        .tag-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .tag-input:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 2px rgba(74,144,226,0.2);
+            outline: none;
+        }
+
+        .add-tag-btn {
+            width: 100%;
+            margin: 10px 0 15px;
+            padding: 12px;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #4a90e2, #357abd);
+            transition: all 0.3s ease;
+        }
+
+        .add-tag-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74,144,226,0.3);
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const settingsBtn = document.querySelector('.settings-btn');
+            const overlay = document.getElementById('settingsOverlay');
+
+            if (settingsBtn && overlay) {
+                settingsBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showOverlay();
+                });
+
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        hideOverlay();
+                    }
+                });
+            }
+        });
+
+        function showOverlay() {
+            const overlay = document.getElementById('settingsOverlay');
+            overlay.style.display = 'block';
+            requestAnimationFrame(() => {
+                overlay.classList.add('active');
+            });
+            
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            document.getElementById('loggedInButtons').style.display = isLoggedIn ? 'block' : 'none';
+            document.getElementById('loggedOutButtons').style.display = isLoggedIn ? 'none' : 'block';
+        }
+
+        function hideOverlay() {
+            const overlay = document.getElementById('settingsOverlay');
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 300);
+        }
+
+        function toggleSettingsOverlay() {
+            hideOverlay();
+        }
+
+        function handleLogout() {
+            localStorage.setItem('isLoggedIn', 'false');
+            hideOverlay();
+            window.location.href = 'index.html';
+        }
+
+        function toggleHiddenTags() {
+            const section = document.getElementById('hiddenTagsSection');
+            section.classList.toggle('active');
+            if (section.classList.contains('active')) {
+                const hiddenTags = JSON.parse(localStorage.getItem('hiddenTags') || '[]');
+                const container = document.getElementById('hiddenTagsList');
+                container.innerHTML = '';
+                hiddenTags.forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'hidden-tag';
+                    tagElement.textContent = tag;
+                    tagElement.onclick = () => unhideTag(tag);
+                    container.appendChild(tagElement);
+                });
+            }
+        }
+
+        function unhideTag(tag) {
+            const hiddenTags = JSON.parse(localStorage.getItem('hiddenTags') || '[]');
+            const updatedTags = hiddenTags.filter(t => t !== tag);
+            localStorage.setItem('hiddenTags', JSON.stringify(updatedTags));
+            toggleHiddenTags();
+        }
+
+        function addNewTag() {
+            const input = document.getElementById('newTagInput');
+            const tag = input.value.trim();
+            if (tag) {
+                const hiddenTags = JSON.parse(localStorage.getItem('hiddenTags') || '[]');
+                if (!hiddenTags.includes(tag)) {
+                    hiddenTags.push(tag);
+                    localStorage.setItem('hiddenTags', JSON.stringify(hiddenTags));
+                    toggleHiddenTags();
+                }
+                input.value = '';
+            }
+        }
+    </script>
+    <style>
+        .sidebar-btn {
+            margin-bottom: 15px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        
+        .sidebar-btn:hover {
+            transform: scale(1.1);
+        }
+
+
+        .toggle-btn {
+            position: fixed;
+            left: 65px;
+            top: 185px;
+            background-color: #4a90e2;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-btn:hover {
+            background-color: #357abd;
+        }
+
         .sidebar {
-            transition: transform 0.3s ease;
+            position: fixed;
+            top: 20%;
+            left: 0;
+            width: 60px;
+            background-color: #343a40;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             transform: translateX(0);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            padding: 10px;
-            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 15px 10px;
+            border-radius: 0 8px 8px 0;
+            z-index: 1000;
         }
         .sidebar.hidden {
             transform: translateX(-100%);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
         #toggleSidebar:hover {
-            background-color: darkblue;
+            background-color: #1a237e;
+            transition: background-color 0.5s ease;
         }
     </style>
     <script>
@@ -735,7 +1133,7 @@
             
             const startPosition = isHidden ? 65 : 0;
             const endPosition = isHidden ? 0 : 65;
-            const duration = 300;
+            const duration = 800;
             const startTime = performance.now();
             
             if (isHidden) {
@@ -748,7 +1146,7 @@
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 
-                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const easeProgress = 1 - Math.pow(1 - progress, 4);
                 
                 const currentPosition = startPosition + (endPosition - startPosition) * easeProgress;
                 toggleBtn.style.left = `${currentPosition}px`;
