@@ -194,7 +194,6 @@
                 <div id="overlayCharacterPersona" style="margin-bottom: 20px; line-height: 1.6; font-size: 1rem;"></div>
             </div>
         </div>
-
         <div class="chat-box" id="chatBox" style="scrollbar-width: thin; scrollbar-color: transparent transparent;">
             <div class="message bot">
                 <div class="message-content" id="firstMessageContent">
@@ -202,6 +201,83 @@
             </div>
             <div id="previewMessage" style="display: none; margin: 10px; padding: 15px; background-color: rgba(74, 144, 226, 0.1); border-radius: 10px; color: #888; font-style: italic;">
             </div>
+            <div id="chatHistory"></div>
+            <script>
+                function saveChat(message, sender) {
+                    if (!message || !message.trim()) return;
+                    
+                    const chat = {
+                        message: message.trim(),
+                        sender: sender,
+                        timestamp: new Date().toISOString(),
+                        number: "1ms"
+                    };
+
+                    fetch('/chats', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(chat)
+                    });
+
+                    displayChat(chat);
+                }
+
+                function displayChat(chat) {
+                    if (!chat.message || !chat.message.trim()) return;
+                    
+                    const chatHistory = document.getElementById('chatHistory');
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = chat.sender === 'bot' ? 'message bot' : 'message user';
+                    messageDiv.innerHTML = `
+                        <div class="message-content">
+                            ${chat.message}
+                        </div>
+                    `;
+
+                    chatHistory.appendChild(messageDiv);
+                }
+
+                function getAllChats() {
+                    const chatHistory = document.getElementById('chatHistory');
+                    const messages = chatHistory.querySelectorAll('.message');
+                    
+                    messages.forEach(message => {
+                        const content = message.querySelector('.message-content').textContent.trim();
+                        const sender = message.classList.contains('bot') ? 'bot' : 'user';
+                        if (content) {
+                            saveChat(content, sender);
+                        }
+                    });
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    const sendBtn = document.getElementById('sendBtn');
+                    const messageInput = document.getElementById('messageInput');
+
+                    if (sendBtn) {
+                        sendBtn.addEventListener('click', function() {
+                            if (messageInput && messageInput.value.trim()) {
+                                saveChat(messageInput.value, 'user');
+                                messageInput.value = '';
+                                getAllChats();
+                            }
+                        });
+                    }
+
+                    if (messageInput) {
+                        messageInput.addEventListener('keypress', function(e) {
+                            if (e.key === 'Enter' && this.value.trim()) {
+                                saveChat(this.value, 'user');
+                                this.value = '';
+                                getAllChats();
+                            }
+                        });
+                    }
+                });
+            </script>
+            </script>
         </div>
 
         <div class="input-area">
@@ -493,7 +569,7 @@
                         'Content-Type': 'application/json'
                     };
 
-                    const checkerResponse = await fetch('https://server-hhcx.onrender.com/api/v1/server/checker/post', {
+                    const checkerResponse = await fetch('/api/v1/server/checker/post', {
                         method: 'POST',
                         headers: headers,
                         body: JSON.stringify({
@@ -510,9 +586,13 @@
                         throw new Error('Checker post request failed');
                     }
 
-                    const getCheckerResponse = await fetch('https://server-hhcx.onrender.com/api/v1/server/checker/get', {
+                    const getCheckerResponse = await fetch('/api/v1/server/checker/get', {
                         method: 'GET',
-                        headers: headers,
+                        headers: {
+                            ...headers,
+                            'Access-Control-Allow-Origin': 'https://flexdapt.vercel.app',
+                            'Access-Control-Allow-Credentials': 'true'
+                        },
                         credentials: 'include'
                     });
 
