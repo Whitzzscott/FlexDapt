@@ -664,13 +664,6 @@
             <h4 style="margin-bottom: 20px; font-weight: 600; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease 0.2s;">Persona</h4>
             <input type="text" placeholder="Name" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #333; border-radius: 8px; background: #111; color: #fff; transition: all 0.3s ease; opacity: 0; transform: translateY(-10px); transition-delay: 0.3s;">
             <textarea placeholder="Description" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #333; border-radius: 8px; min-height: 120px; background: #111; color: #fff; transition: all 0.3s ease; opacity: 0; transform: translateY(-10px); transition-delay: 0.4s;"></textarea>
-            <div class="image-upload-container" style="width: 100%; margin-bottom: 15px; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease 0.5s;">
-                <input type="file" id="imageInput" accept="image/*" style="display: none;">
-                <button onclick="document.getElementById('imageInput').click()" class="btn btn-outline-primary" style="width: 100%; padding: 12px; border-radius: 8px; background: #111; color: #fff; border: 1px dashed #4a90e2; transition: all 0.2s ease;">
-                    <i class="bi bi-cloud-upload"></i> Choose Image
-                </button>
-                <div id="imagePreview" style="margin-top: 10px; width: 100%; height: 150px; border-radius: 8px; background-size: cover; background-position: center; display: none;"></div>
-            </div>
             <button onclick="submitPersona()" class="btn btn-primary" style="width: 100%; padding: 12px; border-radius: 8px; background: #4a90e2; color: #fff; border: none; transition: all 0.2s ease; opacity: 0; transform: translateY(-10px); transition-delay: 0.6s;">
                 Submit
             </button>
@@ -733,11 +726,11 @@
                 </button>
             </div>
             <div id="loggedOutButtons" class="settings-buttons">
-                <button class="btn btn-primary settings-btn" onclick="window.location.href='login/login.html'">
+                <button class="btn btn-primary settings-btn" onclick="window.location.href='login.html'">
                     <i class="bi bi-box-arrow-in-right"></i>
                     Login
                 </button>
-                <button class="btn btn-success settings-btn" onclick="window.location.href='register/register.html'">
+                <button class="btn btn-success settings-btn" onclick="window.location.href='register.html'">
                     <i class="bi bi-person-plus"></i>
                     Register
                 </button>
@@ -780,91 +773,58 @@
             }
         }
 
-        document.getElementById('imageInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('imagePreview');
-                    preview.style.display = 'block';
-                    preview.style.backgroundImage = `url(${e.target.result})`;
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-
         function submitPersona() {
-            const imageInput = document.getElementById('imageInput');
             const nameInput = document.querySelector('input[placeholder="Name"]');
             const descInput = document.querySelector('textarea[placeholder="Description"]');
 
-            if (!nameInput.value.trim()) {
-                alert('Please enter a name');
-                return;
-            }
+    if (!nameInput.value.trim()) {
+        alert('Please enter a name');
+        return;
+    }
 
-            if (!descInput.value.trim()) {
-                alert('Please enter a description');
-                return;
-            }
-
-            if (!imageInput.files[0]) {
-                alert('Please select an image');
-                return;
-            }
-
-            const file = imageInput.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64Image = e.target.result;
-
-                const personaData = {
-                    "Name": nameInput.value.trim(),
-                    "Description": descInput.value.trim(),
-                    "Photo": base64Image
-                };
-
-                localStorage.setItem('savedPersona', JSON.stringify(personaData));
-
-                fetch('https://server-hhcx.onrender.com/persona', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(personaData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                        return;
-                    }
-                    togglePersonaMenu();
-                })
-                .catch(error => {
-                    alert('Error: Server error');
-                    console.error('Error:', error);
-                });
-            }
-            reader.readAsDataURL(file);
+        if (!descInput.value.trim()) {
+            alert('Please enter a description');
+            return;
         }
+        const personaData = {
+            "Name": nameInput.value.trim(),
+            "Description": descInput.value.trim(),
+        };
 
-        window.addEventListener('load', () => {
-            const savedPersona = localStorage.getItem('savedPersona');
-            if (savedPersona) {
-                const data = JSON.parse(savedPersona);
-                const nameInput = document.querySelector('input[placeholder="Name"]');
-                const descInput = document.querySelector('textarea[placeholder="Description"]');
-                const imagePreview = document.getElementById('imagePreview');
-                
-                nameInput.value = data.Name;
-                descInput.value = data.Description;
-                if (data.Photo) {
-                    imagePreview.style.display = 'block';
-                    imagePreview.style.backgroundImage = `url(${data.Photo})`;
-                }
+        localStorage.setItem('savedPersona', JSON.stringify(personaData));
+
+        fetch('https://server-hhcx.onrender.com/persona', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(personaData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
             }
+            togglePersonaMenu();
+        })
+        .catch(error => {
+            alert('Error: Server error');
+            console.error('Error:', error);
         });
+    }
+
+window.addEventListener('load', () => {
+    const savedPersona = localStorage.getItem('savedPersona');
+    if (savedPersona) {
+        const data = JSON.parse(savedPersona);
+        const nameInput = document.querySelector('input[placeholder="Name"]');
+        const descInput = document.querySelector('textarea[placeholder="Description"]');        
+        nameInput.value = data.Name;
+        descInput.value = data.Description;
+    }
+});
+
     </script>
     <style>
         .settings-overlay {
