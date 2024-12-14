@@ -1,124 +1,185 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
+<html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f0f2f5;
-        }
-
-        .form-container {
-            max-width: 450px;
-            padding: 40px;
-            margin-top: 80px;
-            background-color: #ffffff;
-            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
-            border-radius: 12px;
-        }
-
-        .form-container h1 {
-            font-size: 34px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 30px;
-            color: #4e73df;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-control {
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-primary {
-            background-color: #4e73df;
-            border-color: #4e73df;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 16px;
-        }
-
-        .btn-primary:hover {
-            background-color: #365f91;
-            border-color: #365f91;
-        }
-
-        .input-group-text {
-            background-color: #f0f2f5;
-        }
-
-        .text-center a {
-            color: #4e73df;
-            font-weight: 600;
-        }
-
-        .text-center a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<style type="text/css" id="operaUserStyle"></style></head>
 <body>
-    <div class="container d-flex justify-content-center">
-        <div class="form-container animate__animated animate__fadeIn">
-            <h1>Register</h1>
-            <form id="register-form">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Username</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user"></i></span>
-                        <input type="text" class="form-control" id="name" name="name" placeholder="Enter username" required>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required minlength="8">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Register</button>
-                <p class="text-center mt-3">Already have an account? <a href="login.html">Login here</a>.</p>
-            </form>
+    <script src="./Libs/jquery.js"></script>
+    <script src="./Libs/popper.js"></script>
+    <link rel="stylesheet" href="./Libs/popper.min.css">
+    <script src="./Libs/bootstrap.js"></script>
+    <link rel="stylesheet" href="./Libs/animate.css">
+<style>
+    body {
+        background-color: #000;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(45deg, #000000, #1a1a1a);
+        animation: gradientBG 15s ease infinite;
+        background-size: 400% 400%;
+        scrollbar-width: thin;
+        scrollbar-color: transparent transparent;
+        overflow-y: auto;
+    }
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    .container {
+        max-width: 450px;
+        width: 90%;
+        perspective: 1000px;
+    }
+    .form-control {
+        border-radius: 20px;
+        padding: 15px 25px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        background-color: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        backdrop-filter: blur(10px);
+    }
+    .form-control:focus {
+        box-shadow: 0 0 25px rgba(29, 161, 242, 0.3);
+        border-color: #1da1f2;
+        transform: translateY(-2px);
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    .btn-custom {
+        background: linear-gradient(45deg, #1da1f2, #1991da);
+        color: white;
+        border-radius: 25px;
+        padding: 15px 30px;
+        width: 100%;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-custom:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(29, 161, 242, 0.4);
+    }
+    .btn-custom:active {
+        transform: translateY(1px);
+    }
+    .card {
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .register-link {
+        text-align: center;
+        margin-top: 30px;
+        color: #fff;
+    }
+    .register-btn {
+        color: #1da1f2;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        position: relative;
+        padding: 5px 0;
+    }
+    .register-btn:hover {
+        text-decoration: none;
+        color: #fff;
+        text-shadow: 0 0 10px #1da1f2;
+    }
+    .register-btn::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background: linear-gradient(90deg, transparent, #1da1f2, transparent);
+        transform: scaleX(0);
+        transition: transform 0.5s;
+    }
+    .register-btn:hover::after {
+        transform: scaleX(1);
+    }
+    .form-group label {
+        font-weight: 500;
+        color: #fff;
+        margin-bottom: 12px;
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    .form-group {
+        margin-bottom: 30px;
+    }
+    h2 {
+        color: #fff;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+</style>
+<div class="container">
+    <div class="card animate__animated animate__fadeIn animate__faster">
+        <h2 class="animate__animated animate__slideInDown animate__faster">Register</h2>
+        <form id="loginForm">
+            <div class="form-group animate__animated animate__fadeInLeft animate__delay-0.5s">
+                <label for="loginName">Username</label>
+                <input type="text" class="form-control" id="loginName" required maxlength="100" pattern="[a-zA-Z0-9]+" title="Only letters and numbers allowed, max 100 characters" autocomplete="off">
+            </div>
+            <div class="form-group animate__animated animate__fadeInRight animate__delay-0.5s">
+                <label for="loginPassword">Password</label>
+                <input type="password" class="form-control" id="loginPassword" required maxlength="100" required pattern="^[^\s]*$" title="Spaces are not allowed" onkeypress="return !/\s/.test(event.key)" autocomplete="off">
+            </div>
+            <button type="submit" class="btn btn-custom animate__animated animate__bounceIn animate__delay-1s">Register</button>
+        </form>
+        <div class="register-link animate__animated animate__fadeInUp animate__delay-1s">
+            <p>Have an account? <a href="login/login.html" class="register-btn">Sign in here</a></p>
         </div>
     </div>
+</div>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('loginName').value;
+    const password = document.getElementById('loginPassword').value;
 
-    <script>
-        document.getElementById('register-form').addEventListener('submit', async function (event) {
-            event.preventDefault();
-
-            const name = document.getElementById('name').value;
-            const password = document.getElementById('password').value;
-
-            const response = await fetch('https://server-hhcx.onrender.com/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name, password }),
-            });
-
-            const result = await response.json();
-            if (response.ok) {
-                alert('Registration successful!');
-                window.location.href = '../login/login.html';
-            } else {
-                alert(`Error: ${result.error}`);
-            }
+    try {
+        const response = await fetch('https://server-hhcx.onrender.com/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, password })
         });
-    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+        const data = await response.text();
+        const decodedMessage = atob(data);
 
-</html>
+        if (response.ok) {
+            alert(decodedMessage);
+            window.location.href = 'login/login.html';
+        } else {
+            alert(decodedMessage);
+        }
+    } catch (error) {
+        alert('An error occurred during login');
+    }
+});
+</script>
+</body></html>
