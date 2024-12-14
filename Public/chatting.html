@@ -183,7 +183,7 @@
             </div>
         </div>
 
-        <div id="characterOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 1000; backdrop-filter: blur(5px);" onclick="document.getElementById('characterOverlay').style.display='none'">
+        <div id="characterOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 1000; backdrop-filter: blur(5px); scrollbar-width: 1px;" onclick="document.getElementById('characterOverlay').style.display='none'">
             <div style="position: relative; max-width: 600px; margin: 50px auto; background: #2c2c2c; padding: 30px; border-radius: 15px; color: white; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);" onclick="event.stopPropagation();">
                 <button onclick="document.getElementById('characterOverlay').style.display='none'" style="position: absolute; right: 15px; top: 15px; background: none; border: none; color: #ff4d4d; font-size: 24px; cursor: pointer; transition: color 0.3s;">
                     ×
@@ -201,14 +201,14 @@
             </div>
             <div id="previewMessage" style="display: none; margin: 10px; padding: 15px; background-color: rgba(74, 144, 226, 0.1); border-radius: 10px; color: #888; font-style: italic;">
             </div>
-            <div id="chatHistory"></div>
-            </script>
+            <div id="chatHistory"></div>   
         </div>
 
         <div class="input-area">
             <input type="text" id="messageInput" placeholder="Type your message..." oninput="showPreview(this.value)" onkeydown="if(event.key === 'Enter') { hidePreview(); }" />
             <button id="sendBtn" onclick="hidePreview()"><i class="fas fa-paper-plane"></i></button>
         </div>
+
         <script>
             function showPreview(text) {
                 const preview = document.getElementById('previewMessage');
@@ -216,6 +216,8 @@
                     preview.style.display = 'none';
                 } else {
                     preview.style.display = 'block';
+                    preview.style.borderRadius = '5px'
+
                     preview.textContent = text;
                 }
             }
@@ -484,79 +486,75 @@
                 chatBox.scrollTop = chatBox.scrollHeight;
 
                 try {
-                    if (!characterData || !characterData.name || !characterData.description || 
-                        !characterData.modelInstructions || !characterData.system || 
-                        !characterData.persona || !characterData.firstMessage) {
-                        throw new Error('Character data is missing required fields');
-                    }
+                    if (!characterData) {
+        throw new Error('Character data is undefined');
+    }
 
-                    const headers = {
-                        'Content-Type': 'application/json'
-                    };
+    const requiredFields = ['name', 'description', 'modelInstructions', 'system', 'persona', 'firstMessage'];
+    const missingFields = requiredFields.filter(field => !characterData[field]);
 
-                    const checkerResponse = await fetch('https://server-hhcx.onrender.com/api/v1/server/checker/post', {
-                        method: 'POST',
-                        headers: headers,
-                        body: JSON.stringify({
-                            name: characterData.name,
-                            description: characterData.description,
-                            modelInstructions: characterData.modelInstructions,
-                            system: characterData.system,
-                            persona: characterData.persona,
-                            firstMessage: characterData.firstMessage
-                        })
-                    });
+    if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+    }
 
-                    if (!checkerResponse.ok) {
-                        throw new Error('Checker post request failed');
-                    }
+    const headers = { 'Content-Type': 'application/json' };
 
-                    const getCheckerResponse = await fetch('https://server-hhcx.onrender.com/api/v1/server/checker/get', {
-                        method: 'GET',
-                        headers: {
-                            ...headers,
-                        },
-                    });
+    const checkerResponse = await fetch('https://server-hhcx.onrender.com/api/v1/server/checker/post', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(characterData),
+    });
 
-                    if (!getCheckerResponse.ok) {
-                        throw new Error('Failed to get checker data');
-                    }
+    if (!checkerResponse.ok) {
+        const errorDetails = await checkerResponse.text();
+        throw new Error(`Checker post request failed: ${errorDetails}`);
+    }
 
-                    const getCheckerData = await getCheckerResponse.json();
-                    const decodedData = atob(getCheckerData.data);
-                    const parsedData = JSON.parse(decodedData);
+    const getCheckerResponse = await fetch('https://server-hhcx.onrender.com/api/v1/server/checker/get', { method: 'GET', headers: headers });
 
-                    const response = await fetch('https://server-hhcx.onrender.com/generatetext', {
-                        method: 'POST',
-                        headers: headers,
-                        body: JSON.stringify({
-                            prompt: messageText,
-                            max_tokens: settings.max_tokens || 100,
-                            top_k: settings.top_k || 50,
-                            temperature: settings.temperature || 0.7,
-                            character: {
-                                name: parsedData.name,
-                                description: parsedData.description, 
-                                modelInstructions: parsedData.modelInstructions,
-                                system: parsedData.system,
-                                persona: parsedData.persona,
-                                firstMessage: parsedData.firstMessage
-                            }
-                        })
-                    });
+    if (!getCheckerResponse.ok) {
+        const errorDetails = await getCheckerResponse.text();
+        throw new Error(`Failed to get checker data: ${errorDetails}`);
+    }
 
-                    if (!response.ok) {
-                        throw new Error('Failed to get bot response');
-                    }
+    const getCheckerData = await getCheckerResponse.json();
+    const decodedData = atob(getCheckerData.data || '');
+    let parsedData;
 
-                    const data = await response.json();
-                    const botResponse = data.model_response?.result?.response;
-                    
-                    if (!botResponse) {
-                        throw new Error('Invalid response format from server');
-                    }
+    try {
+        parsedData = JSON.parse(decodedData);
+    } catch (err) {
+        throw new Error('Failed to parse checker data: Invalid JSON format');
+    }
 
-                    typingIndicator.remove();
+    if (!messageText || messageText.trim() === '') {
+        throw new Error('Message or prompt is required');
+    }
+
+    const botResponseRequest = await fetch('https://serverv32.onrender.com/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            prompt: messageText.trim(),
+            system_message: parsedData.system || '',
+            model_instructions: parsedData.modelInstructions || '',
+            persona: parsedData.persona || '',
+            name: parsedData.name || '',
+            description: parsedData.description || '',
+            first_message: parsedData.firstMessage || '',
+        }),
+    });
+
+    if (!botResponseRequest.ok) {
+        const errorDetails = await botResponseRequest.text();
+        throw new Error(`Failed to get bot response: ${errorDetails}`);
+    }
+
+    if (!botResponseRequest.failed){
+        console.log("Err")
+    }
+
+    typingIndicator.remove();
 
                     let botMessageElement = document.createElement('div');
                     botMessageElement.classList.add('message', 'bot');
@@ -812,15 +810,19 @@
                         clearTimeout(longPressTimer);
                     });
 
-                    if (data?.model_response?.result?.response) {
-                        for (let i = 0; i < data.model_response.result.response.length; i++) {
-                            botMessageContent.innerText = data.model_response.result.response.substring(0, i + 1);
-                            chatBox.scrollTop = chatBox.scrollHeight;
-                            await new Promise(resolve => setTimeout(resolve, 20));
-                        }
-                    } else {
-                        throw new Error('Invalid response format');
-                    }
+                    const responseData = await botResponseRequest.json();
+const data = responseData.result?.response;
+
+if (data && typeof data === 'string') {
+    for (let i = 0; i < data.length; i++) {
+        botMessageContent.innerText = data.substring(0, i + 1);
+        chatBox.scrollTop = chatBox.scrollHeight; 
+        await new Promise(resolve => setTimeout(resolve, 20));
+    }
+} else {
+    throw new Error('Invalid response format');
+}
+
                 } catch (error) {
                     console.error('Error:', error);
                     typingIndicator.remove();
@@ -845,10 +847,12 @@
                         errorContent.innerText = errorMessage.substring(0, i + 1);
                         chatBox.scrollTop = chatBox.scrollHeight;
                         await new Promise(resolve => setTimeout(resolve, 20));
+                    } if (data.responseData.result?.response == ""){
+                        console.log("ERR")
                     }
                 }
             }
-        }
+        } 
 
         document.getElementById('sendBtn').addEventListener('click', handleMessage);
         
